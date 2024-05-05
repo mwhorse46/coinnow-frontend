@@ -32,7 +32,6 @@ import Fonts from './helpers/Fonts';
 import { _roundDimensions } from './helpers/util';
 import { echo } from './redux/Api/echo';
 import { setNewProducts } from './redux/Action/general';
-import UpdatePriceProvider from './screens/UpdatePriceProvider.js';
 const BottomTab = createMaterialBottomTabNavigator();
 function MyTabs(props) {
   const [receivedCounts, setReceivedCounts] = useState(0);
@@ -88,50 +87,49 @@ function MyTabs(props) {
   const mode = userData?.mode;
 
   return (
-    <UpdatePriceProvider>
-      <BottomTab.Navigator
-        initialRouteName="DigitalStudioShowScreen"
-        activeColor="red"
-        inactiveColor="white"
-        shifting={false}
-        barStyle={styles.tabbarStyle}>
-        {mode !== 'customer' && (
-          <BottomTab.Screen
-            name="HomeScreen"
-            children={props => (
-              <SupplierPage
-                product={newProduct}
-                setNewProduct={setNewProduct}
-                {...props}
-              />
-            )}
-            options={{
-              headerShown: false,
-              cardStyleInterpolator:
-                CardStyleInterpolators.forScaleFromCenterAndroid,
-
-              tabBarIcon: ({ focused, tintColor }) => <View />,
-              tabBarLabel: 'Item Shop',
-            }}
-          />
-        )}
+    <BottomTab.Navigator
+      initialRouteName="DigitalStudioShowScreen"
+      activeColor="red"
+      inactiveColor="white"
+      shifting={false}
+      barStyle={styles.tabbarStyle}>
+      {mode !== 'customer' && (
         <BottomTab.Screen
-          name="SellerStore"
-          children={props => <SellerStore product={newProduct} {...props} />}
+          name="HomeScreen"
+          children={props => (
+            <SupplierPage
+              product={newProduct}
+              setNewProduct={setNewProduct}
+              {...props}
+            />
+          )}
           options={{
             headerShown: false,
             cardStyleInterpolator:
               CardStyleInterpolators.forScaleFromCenterAndroid,
 
-            tabBarIcon: ({ focused, tintColor }) => (
-              <View style={{ height: 0 }} />
-            ),
-
-            tabBarLabel: 'Marketplace',
+            tabBarIcon: ({ focused, tintColor }) => <View />,
+            tabBarLabel: 'Item Shop',
           }}
         />
+      )}
+      <BottomTab.Screen
+        name="SellerStore"
+        children={props => <SellerStore product={newProduct} {...props} />}
+        options={{
+          headerShown: false,
+          cardStyleInterpolator:
+            CardStyleInterpolators.forScaleFromCenterAndroid,
 
-        {/* <BottomTab.Screen
+          tabBarIcon: ({ focused, tintColor }) => (
+            <View style={{ height: 0 }} />
+          ),
+
+          tabBarLabel: 'Marketplace',
+        }}
+      />
+
+      {/* <BottomTab.Screen
         name="DigitalStudioShowScreen"
         children={props => (
           <DigitalStudioShowScreen {...props} renderToCurrent={true} />
@@ -149,23 +147,22 @@ function MyTabs(props) {
         }}
       /> */}
 
-        <BottomTab.Screen
-          name="ProfileScreen"
-          children={props => (
-            <ProfileScreen receivedCounts={receivedCounts} {...props} />
-          )}
-          options={{
-            headerShown: false,
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-            tabBarLabel: 'Account',
+      <BottomTab.Screen
+        name="ProfileScreen"
+        children={props => (
+          <ProfileScreen receivedCounts={receivedCounts} {...props} />
+        )}
+        options={{
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          tabBarLabel: 'Account',
 
-            tabBarIcon: ({ focused, tintColor }) => (
-              <View style={{ height: 0 }} />
-            ),
-          }}
-        />
-      </BottomTab.Navigator>
-    </UpdatePriceProvider>
+          tabBarIcon: ({ focused, tintColor }) => (
+            <View style={{ height: 0 }} />
+          ),
+        }}
+      />
+    </BottomTab.Navigator>
   );
 }
 function mapStateToProps(state) {
