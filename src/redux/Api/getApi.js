@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN, API_URL } from '@common/config';
+import { ACCESS_TOKEN } from '@common/config';
 import axios from 'axios';
 import * as RootNavigation from '../../AppNavigator';
 
@@ -6,6 +6,8 @@ var authHeader = new Headers();
 authHeader.append('accept', 'application/json');
 authHeader.append('Content-Type', 'multipart/form-data');
 authHeader.append('token', 'RuQChqz2FqJkP6wMAQiVlLx5BOTRIX');
+const API_URL = 'http://10.0.2.2:8000/api/';
+// const API_URL = 'https://my.inventory.marketmajesty.net/api/';
 const api_url = API_URL;
 const getDataService = {
   getData: function (url) {
