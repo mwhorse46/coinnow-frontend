@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { connect } from 'react-redux';
@@ -26,17 +26,17 @@ function News(props) {
   const [news, setNews] = useState([]);
   const [totalPage, setTotalPage] = useState(1);
   const [progress, setProgress] = useState(0);
-
+  console.log({ progress, news });
   useFocusEffect(
     React.useCallback(() => {
-      getApi.getData('getBannerImages').then(response => {
-        const imgs = response.images.map(image => {
+      getApi.getData('getBannerImages').then((response) => {
+        const imgs = response.images.map((image) => {
           return (
             'https://my.inventory.marketmajesty.net/uploads/banner/' +
             image.image
           );
         });
-        getApi.getData('autoPriceTimer').then(res => {
+        getApi.getData('autoPriceTimer').then((res) => {
           if (res.status == 1) {
             if (res.percent < 50) {
               setProgress(res.percent + 50);
@@ -48,59 +48,33 @@ function News(props) {
         setImages(imgs);
       });
       fetchData(1);
-    }, []),
+    }, [fetchData])
   );
 
-  useFocusEffect(() => {
-    let progressTimer = setInterval(() => {
-      getApi.getData('autoPriceTimer').then(res => {
-        if (res.status == 1) {
-          if (res.percent < 50) {
-            setProgress(res.percent + 50);
+  const fetchData = useCallback(
+    (page) => {
+      setLoading(true);
+      getApi
+        .getData(`news?page=${page}`)
+        .then((res) => {
+          setCurrentPage(page);
+          if (page === 1) {
+            setNews([...res.data.data]);
           } else {
-            setProgress(res.percent - 50);
+            setNews([...news, ...res.data.data]);
           }
-        }
-      });
-    }, 5000);
-    echo.channel('chat-channel').listen('.message.new', data => {
-      if (data.sender == 'news-sent') {
-        // if (data.receiver.id == 'all') {
-        //   fetchData(1);
-        //   return;
-        // }
-        setNews([data.receiver, ...news]);
-        return;
-      }
-    });
+          setTotalPage(res.data.last_page);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    },
+    [news]
+  );
 
-    return () => {
-      echo.channel('chat-channel').stopListening('.message.new');
-      clearInterval(progressTimer);
-    };
-  });
-
-  const fetchData = page => {
-    setLoading(true);
-    getApi
-      .getData(`news?page=${page}`)
-      .then(res => {
-        setCurrentPage(page);
-        if (page === 1) {
-          setNews([...res.data.data]);
-        } else {
-          setNews([...news, ...res.data.data]);
-        }
-        setTotalPage(res.data.last_page);
-        setLoading(false);
-      })
-      .catch(err => {
-        setLoading(false);
-      });
-  };
-
-  const renderItems = data => {
-    return data.map(item => {
+  const renderItems = (data) => {
+    return data.map((item) => {
       switch (item.type) {
         case 'default':
           return (
@@ -168,7 +142,7 @@ function News(props) {
     }
     if (totalPage > 1 && currentPage < totalPage) {
       setLoading(true);
-      setCurrentPage(prevState => prevState + 1);
+      setCurrentPage((prevState) => prevState + 1);
       fetchData(currentPage + 1);
     }
   };
@@ -179,44 +153,7 @@ function News(props) {
         {/* <SearchBar navigation={props.navigation} /> */}
 
         {/* SlideBar */}
-        <SliderBox
-          images={images}
-          ImageComponentStyle={{
-            borderRadius: 10,
-            width: '90%',
-            marginTop: 15,
-            marginRight: 30,
-          }}
-          sliderBoxHeight={150}
-          resizeMethod={'resize'}
-          resizeMode={'cover'}
-          autoplay
-          circleLoop
-          dotStyle={{
-            width: 0,
-          }}
-        />
-        <View style={styles.progress}>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                marginLeft: 100 - progress + '%',
-              },
-            ]}>
-            <View style={styles.bar} />
-          </View>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                marginLeft: '50%',
-                marginTop: 0,
-              },
-            ]}>
-            <Image source={arrow} />
-          </View>
-        </View>
+
         <LiveUpdate />
         <View>{renderItems(news)}</View>
         {loading && <OtrixLoader />}

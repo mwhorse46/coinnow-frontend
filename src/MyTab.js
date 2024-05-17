@@ -21,6 +21,7 @@ import {
   SellerStore,
   ProfileScreen,
   DigitalStudioShowScreen,
+  CommentScreen,
 } from './screens/index';
 
 import {
@@ -128,12 +129,9 @@ function MyTabs(props) {
           tabBarLabel: 'Marketplace',
         }}
       />
-
-      {/* <BottomTab.Screen
-        name="DigitalStudioShowScreen"
-        children={props => (
-          <DigitalStudioShowScreen {...props} renderToCurrent={true} />
-        )}
+      <BottomTab.Screen
+        name="Support"
+        children={props => <CommentScreen {...props} />}
         options={{
           headerShown: false,
           cardStyleInterpolator:
@@ -143,10 +141,9 @@ function MyTabs(props) {
             <View style={{ height: 0 }} />
           ),
 
-          tabBarLabel: 'For you',
+          tabBarLabel: 'Support',
         }}
-      /> */}
-
+      />
       <BottomTab.Screen
         name="ProfileScreen"
         children={props => (

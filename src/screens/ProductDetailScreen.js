@@ -41,12 +41,13 @@ import {
 import { CURRENCY } from '@env';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
-import { LineChart } from 'react-native-chart-kit';
+// import { LineChart } from 'react-native-chart-kit';
 import { ConfirmDialog } from 'react-native-simple-dialogs';
 import { echo } from '../redux/Api/echo';
 import { useFocusEffect } from '@react-navigation/native';
 import { OtrixHeader } from '../component';
 import { Dimensions } from 'react-native';
+import ChartGraph from '../component/GiftGraph';
 function ProductDetailScreen(props) {
   const scrollRight = useRef();
   const { USER_AUTH, userData } = props;
@@ -71,6 +72,20 @@ function ProductDetailScreen(props) {
     prices: [],
     created_at: [],
   });
+  const priceData = lineChartData.prices.map((price, index) => {
+    return {
+      value: price,
+      date: moment(lineChartData.created_at[index]).format('HH:mm A'),
+      label:
+        index % 10 === 0
+          ? moment(lineChartData.created_at[index]).format('HH:mm A')
+          : '',
+      labelTextStyle:
+        index % 10 === 0 ? { color: 'lightgray', width: 60, fontSize: 9 } : {},
+    };
+  });
+  const maxPrice = Math.max(...lineChartData.prices) * 1.3;
+  console.log({ maxPrice });
   const [state, setState] = React.useState({
     loading: true,
     productPrice: 0,
@@ -146,29 +161,29 @@ function ProductDetailScreen(props) {
     }
   }, [productDetail]);
 
-  useFocusEffect(() => {
-    echo.channel('chat-channel').listen('.message.new', data => {
-      if (
-        data.sender === 'price update' &&
-        props.route.params.data.id === data.receiver.id
-      ) {
-        setPrices(data.receiver.productPrice);
-        setState({
-          ...state,
-          productPrice: data.receiver.price,
-        });
-        const newPrice = {
-          time: moment(data.receiver.productPrice[0].created_at).format(
-            'DD MMM YYYY hh:mm:ss a',
-          ),
-          title: data.receiver.productPrice[0].price,
-        };
-        setTimelineData(prevState => [newPrice, ...prevState]);
-        return;
-      }
-    });
-    return () => echo.channel('chat-channel').stopListening('.message.new');
-  });
+  // useFocusEffect(() => {
+  //   echo.channel('chat-channel').listen('.message.new', data => {
+  //     if (
+  //       data.sender === 'price update' &&
+  //       props.route.params.data.id === data.receiver.id
+  //     ) {
+  //       setPrices(data.receiver.productPrice);
+  //       setState({
+  //         ...state,
+  //         productPrice: data.receiver.price,
+  //       });
+  //       const newPrice = {
+  //         time: moment(data.receiver.productPrice[0].created_at).format(
+  //           'DD MMM YYYY hh:mm:ss a',
+  //         ),
+  //         title: data.receiver.productPrice[0].price,
+  //       };
+  //       setTimelineData(prevState => [newPrice, ...prevState]);
+  //       return;
+  //     }
+  //   });
+  //   return () => echo.channel('chat-channel').stopListening('.message.new');
+  // });
 
   const showOutOfStock = () => {
     setTimeout(() => {
@@ -316,7 +331,6 @@ function ProductDetailScreen(props) {
       );
     }
   };
-
   const getDetails = useCallback(() => {
     const { data } = props.route.params;
     setPrices(data.product_price);
@@ -682,7 +696,8 @@ function ProductDetailScreen(props) {
                   </Text>
                 </View>
               </View>
-              {lineChartData &&
+              <ChartGraph data={priceData} maxValue={maxPrice} />
+              {/* {lineChartData &&
                 lineChartData.prices &&
                 lineChartData.prices.length > 1 && (
                   <LineChart
@@ -743,7 +758,7 @@ function ProductDetailScreen(props) {
                         </View>
                       ) : null;
                     }}
-                    onDataPointClick={data => {
+                    onDataPointClick={(data) => {
                       let isSamePoint =
                         tooltipPos.x === data.x && tooltipPos.y === data.y;
                       let posX = data.x;
@@ -751,10 +766,10 @@ function ProductDetailScreen(props) {
                         posX = Dimensions.get('window').width - 105;
                       }
                       const created_at = moment(
-                        lineChartData.created_at[data.index],
+                        lineChartData.created_at[data.index]
                       ).format('YYYY/MM/DD hh:mm:ss a');
                       isSamePoint
-                        ? setTooltipPos(previousState => {
+                        ? setTooltipPos((previousState) => {
                             return {
                               ...previousState,
                               value: data.value,
@@ -773,7 +788,7 @@ function ProductDetailScreen(props) {
                           });
                     }}
                   />
-                )}
+                )} */}
               <View style={styles.footerView}>
                 <View
                   style={{

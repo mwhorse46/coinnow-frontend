@@ -52,7 +52,9 @@ function Inventory(props) {
       let quantity = 0,
         price = 0;
       for (let i = 0; i < data.length; i++) {
+        // eslint-disable-next-line radix
         quantity += parseInt(data[i].pivot.quantity);
+        // eslint-disable-next-line radix
         price += parseInt(data[i].pivot.quantity) * parseInt(data[i].price);
       }
       setTotal({
@@ -71,22 +73,20 @@ function Inventory(props) {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return () => unsubscribe();
   }, [state]);
-
   const getInvestedDigitals = () => {
     setLoading(true);
     return getApi
       .getData('seller/investedImages')
-      .then(res => {
+      .then((res) => {
         setLoading(false);
         setInvestedDigitals(res);
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(e);
         setLoading(false);
       });
   };
-
-  const getData = text => {
+  const getData = (text) => {
     if (text.length > -1) {
       return setTimeout(() => {
         if (state.data?.length < 1) {
@@ -95,9 +95,9 @@ function Inventory(props) {
 
         return getApi
           .getData('seller/searchProducts?q=' + text, [])
-          .then(response => {
-            if (response.status == 1) {
-              logfunction('RESPONSEEE ', response.data);
+          .then((response) => {
+            console.log({ response });
+            if (response.status === 1) {
               setState({
                 showSuggestions: true,
                 showMost: false,
@@ -123,6 +123,7 @@ function Inventory(props) {
   };
 
   const { searchKeyword, data, showMost, showSuggestions } = state;
+  console.log({ data });
   return (
     <OtrixContainer customStyles={{ backgroundColor: '#292B2E' }}>
       <OtrixHeader customStyles={{ backgroundColor: '#292B2E' }}>
@@ -136,27 +137,6 @@ function Inventory(props) {
         </View>
       </OtrixHeader>
 
-      {/* <View style={[styles.headerView]}>
-        <View style={styles.searchContainer}>
-          <Icon name="search" style={styles.searchIcon} />
-          <View style={styles.verticalLine} />
-          <Input
-            w={'100%'}
-            autoFocus={false}
-            variant=""
-            placeholder="Search Products"
-            style={[styles.textInputSearchStyle, { flex: 1 }]}
-            returnKeyType="search"
-            value={searchKeyword}
-            onEndEditing={e => {
-              getData(e.nativeEvent.text);
-            }}
-            onChangeText={value => {
-              setState({ ...state, searchKeyword: value });
-            }}
-          />
-        </View>
-      </View> */}
       <View
         style={{
           flexDirection: 'row',

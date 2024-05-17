@@ -184,18 +184,18 @@ function* doLogin(action) {
 
 function* doLogout(action) {
   try {
-    const { payload } = action;
-    AsyncStorage.removeItem('IS_AUTH');
-    AsyncStorage.removeItem('CUSTOMER_DATA');
-    yield put(authStatus(false));
     let wishData = { totalCount: 0, wishlistData: [] };
-    AsyncStorage.removeItem('GET_LOCAL_WISHLIST');
-    yield put(successWishlist(wishData));
     let storeArr = { totalCount: 0 };
-    AsyncStorage.removeItem('CART_DATA');
+    yield put(authStatus(false));
+    console.log('DuSan!!!!');
+    yield put(successWishlist(wishData));
     yield put(successCart(storeArr));
-    RootNavigation.navigate('HomeScreen');
     yield put(authData({}));
+    RootNavigation.navigate('MainScreen');
+    AsyncStorage.removeItem('CUSTOMER_DATA');
+    AsyncStorage.removeItem('IS_AUTH');
+    AsyncStorage.removeItem('GET_LOCAL_WISHLIST');
+    AsyncStorage.removeItem('CART_DATA');
   } catch (e) {
     logfunction('ERROR =', e);
   }

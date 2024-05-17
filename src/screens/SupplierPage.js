@@ -23,7 +23,7 @@ function SupplierPage(props) {
     loading: true,
     profileImageURL: null,
   });
-  const { setNewProducts, newProducts } = props;
+  const { newProducts } = props;
   const [loading1, setLoading] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalPage, setTotalPage] = React.useState(1);
@@ -34,54 +34,60 @@ function SupplierPage(props) {
     props.addToWishList(wishlistData, id);
   };
   const fetchData = page => {
+    console.log('fetchData', page);
     return getApi
       .getData(`getNewProductsV1?page=${page}`)
       .then(response => {
+        console.log({ response });
         setLoading(false);
         if (response.status == 1) {
           setCurrentPage(response.productsList.current_page);
           setTotalPage(response.productsList.last_page);
           if (page == 1) {
-            setNewProducts(response.productsList.data);
+            props.setNewProducts(response.productsList.data);
             return;
           } else {
-            setNewProducts([...newProducts, ...response.productsList.data]);
+            props.setNewProducts([
+              ...newProducts,
+              ...response.productsList.data,
+            ]);
           }
         }
       })
       .catch(err => {
+        console.log({ err });
         setLoading(false);
       });
   };
-  useFocusEffect(
-    useCallback(() => {
-      if (props.product) {
-        if (props.product.id == 'all') {
-          fetchData(1).then(() => {
-            props.setNewProduct(null);
-          });
-          return;
-        }
-        for (let i = 0; i < newProducts?.length; i++) {
-          if (newProducts[i].id == props.product.id) {
-            newProducts[i].price = props.product.price;
-            newProducts[i].product_price = props.product.productPrice;
-            setNewProducts([...newProducts]);
-            return;
-          }
-        }
-      }
-    }, [props.product]),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (props.product) {
+  //       if (props.product.id == 'all') {
+  //         fetchData(1).then(() => {
+  //           props.setNewProduct(null);
+  //         });
+  //         return;
+  //       }
+  //       for (let i = 0; i < newProducts?.length; i++) {
+  //         if (newProducts[i].id == props.product.id) {
+  //           newProducts[i].price = props.product.price;
+  //           newProducts[i].product_price = props.product.productPrice;
+  //           setNewProducts([...newProducts]);
+  //           return;
+  //         }
+  //       }
+  //     }
+  //   }, [props.product]),
+  // );
 
   useEffect(() => {
+    fetchData(1);
     getApi.getData('getBannerImages').then(response => {
       const imgs = response.images.map(image => {
         return 'https://my.inventory.marketmajesty.net/uploads/banner/' + image;
       });
       setImages(imgs);
     });
-    fetchData(1);
   }, []);
   useFocusEffect(
     React.useCallback(() => {
@@ -152,7 +158,7 @@ function SupplierPage(props) {
           <NewProduct
             navigation={props.navigation}
             wishlistArr={wishlistData}
-            data={newProducts.length > 0 ? newProducts : []}
+            data={newProducts?.length > 0 ? newProducts : []}
             arr={newProducts}
             addToWishlist={addToWish}
             userAuth={props.USER_AUTH}

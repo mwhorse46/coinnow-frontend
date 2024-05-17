@@ -6,7 +6,8 @@ import {
   useFocusEffect,
 } from '@react-navigation/native';
 import Fontisto from 'react-native-vector-icons/Fontisto';
-
+import getApi from '@apis/getApi';
+import { useDispatch } from 'react-redux';
 import {
   createStackNavigator,
   CardStyleInterpolators,
@@ -18,6 +19,7 @@ import {
   HomeScreen,
   SupplierPage,
   Inventory,
+  Withdraw,
   SellerStore,
   SettingScreen,
   LoginScreen,
@@ -84,7 +86,7 @@ import Trade from './screens/Trade';
 import { echo } from './redux/Api/echo';
 import News from './screens/News';
 import ClansPacks from './screens/ClansPacks';
-import { setNewProducts } from './redux/Action/general';
+import { setNewProducts, getBackgroundImage } from './redux/Action/general';
 import MyTabs from './MyTab';
 const SettingStack = createStackNavigator();
 export const navigationRef = createNavigationContainerRef();
@@ -139,6 +141,19 @@ function AuthNavigator() {
 const Stack = createStackNavigator();
 function AppNavigator(props) {
   const { cartCount, authStatus, userData } = props;
+  const dispatch = useDispatch();
+  useEffect(() => {
+    getButtonImages();
+  }, []);
+  const getButtonImages = () => {
+    getApi.getData('getButtonImages').then((response) => {
+      const background = response.find((item) => item.type === 5).image;
+      console.log({ background });
+      dispatch(
+        getBackgroundImage(`${process.env.ASSETS_DIR}button/${background}`)
+      );
+    });
+  };
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -220,6 +235,14 @@ function AppNavigator(props) {
         <Stack.Screen
           name="Inventory"
           component={Inventory}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        />
+        <Stack.Screen
+          name="Withdraw"
+          component={Withdraw}
           options={{
             headerShown: false,
             cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
@@ -579,12 +602,13 @@ function mapStateToProps(state) {
   };
 }
 
-const mapDispatchToProps = dispatch =>
+const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       setNewProducts,
+      getBackgroundImage,
     },
-    dispatch,
+    dispatch
   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(AppNavigator);

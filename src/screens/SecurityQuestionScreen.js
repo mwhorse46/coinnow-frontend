@@ -42,7 +42,7 @@ function SecurityQuestionScreen(props) {
   const [errors, setErrors] = React.useState({});
   const { question, answer, submited, loading, message, type } = formData;
   const [questions, setQuestions] = React.useState([]);
-
+  const [existAnswer, setExistAnswer] = React.useState(null);
   // console.error(props.customerData.email);
 
   useEffect(() => {
@@ -50,14 +50,21 @@ function SecurityQuestionScreen(props) {
   }, []);
 
   const fetchData = () => {
+    let sendData = new FormData();
+    sendData.append('email', props.customerData.email);
     setData({
       ...formData,
       loading: true,
     });
     getApi
       .getData('getSecurityQuestions')
-      .then(res => {
+      .then(async res => {
+        let answerResponse = await getApi.postData(
+          'seller/getAnswersForQuestions',
+          sendData,
+        );
         setQuestions(res);
+        setExistAnswer(answerResponse.answer);
         setData({
           ...formData,
           loading: false,
@@ -183,7 +190,12 @@ function SecurityQuestionScreen(props) {
             </FormControl.ErrorMessage>
           )}
         </FormControl> */}
-
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 11, color: '#3AFA95' }}>
+            {!!existAnswer &&
+              'You already set up a securty question, If you wish you can change it.'}
+          </Text>
+        </View>
         <FormControl
           isRequired
           style={{

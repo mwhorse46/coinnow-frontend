@@ -27,8 +27,6 @@ import { logfunction } from '@helpers/FunctionHelper';
 import Fonts from '@helpers/Fonts';
 import getApi from '@apis/getApi';
 import { style } from 'styled-system';
-import { backgroundImage } from '../common/config';
-
 function RegisterScreen(props) {
   const [formData, setData] = React.useState({
     firstName: null,
@@ -43,7 +41,6 @@ function RegisterScreen(props) {
     loading: false,
   });
   const [mode, setMode] = React.useState('seller');
-
   const [state, setDatapassword] = React.useState({ secureEntry: true });
   const [errors, setErrors] = React.useState({});
   const {
@@ -58,8 +55,6 @@ function RegisterScreen(props) {
     message,
     loading,
   } = formData;
-
-  useEffect(() => {}, []);
 
   const validate = () => {
     logfunction('Name ', firstName);
@@ -134,7 +129,7 @@ function RegisterScreen(props) {
       sendData.append('password', password);
       sendData.append('creation', 'D');
       try {
-        getApi.postData('seller/register', sendData).then(response => {
+        getApi.postData('seller/register', sendData).then((response) => {
           logfunction('RESPONSE ', response);
           if (response && response.status === 1) {
             props.navigation.navigate('LoginScreen');
@@ -166,10 +161,14 @@ function RegisterScreen(props) {
 
   return (
     <OtrixContainer
-      customStyles={{ backgroundColor: 'black', position: 'relative' }}>
+      customStyles={{ position: 'relative', backgroundColor: 'black' }}>
       <Image
-        source={backgroundImage}
-        style={{ width: '100%', height: '100%', borderRadius: 20, zIndex: -1 }}
+        source={{ uri: props.backgroundImage }}
+        style={{
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+        }}
       />
       {/* Header */}
       <View style={{ position: 'absolute', top: 0 }}>
@@ -190,7 +189,7 @@ function RegisterScreen(props) {
               placeholder="First Name"
               placeholderTextColor="white"
               style={styles.input}
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, submited: false, firstName: value }),
                   delete errors.name;
               }}
@@ -205,7 +204,7 @@ function RegisterScreen(props) {
               placeholder="Last Name"
               style={styles.input}
               placeholderTextColor="white"
-              onChangeText={value =>
+              onChangeText={(value) =>
                 setData({ ...formData, submited: false, lastName: value })
               }
             />
@@ -221,7 +220,7 @@ function RegisterScreen(props) {
               placeholder="Username"
               style={styles.input}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, email: value }),
                   delete errors.email,
                   delete errors.invalidEmail;
@@ -253,7 +252,7 @@ function RegisterScreen(props) {
               placeholder="Mobile Number"
               style={styles.input}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, submited: false, mobileNumber: value }),
                   delete errors.mobileNumber,
                   delete errors.invalidmobileNumber;
@@ -283,7 +282,7 @@ function RegisterScreen(props) {
               placeholder="Password"
               style={styles.input}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, submited: false, password: value }),
                   delete errors.password;
               }}
@@ -318,7 +317,7 @@ function RegisterScreen(props) {
               placeholder="Confirm Password"
               style={styles.input}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, submited: false, cpassword: value }),
                   delete errors.cpassword;
               }}
@@ -375,8 +374,10 @@ function RegisterScreen(props) {
   );
 }
 
-function mapStateToProps({ params }) {
-  return {};
+function mapStateToProps(state) {
+  return {
+    backgroundImage: state.mainScreenInit.backgroundImage,
+  };
 }
 
 export default connect(mapStateToProps)(RegisterScreen);

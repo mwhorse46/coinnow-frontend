@@ -22,18 +22,17 @@ function CommentScreen(props) {
   const [totalPage, setTotalPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const scrollViewRef = useRef(null);
-
   useFocusEffect(
     useCallback(() => {
       fetchData(1);
-    }, []),
+    }, [])
   );
 
-  const fetchData = page => {
+  const fetchData = (page) => {
     setLoading(true);
     getApi
       .getData(`getComments?page=${page}`)
-      .then(res => {
+      .then((res) => {
         setCurrentPage(page);
         if (page === 1) {
           setComments([...res.data]);
@@ -43,7 +42,7 @@ function CommentScreen(props) {
         setTotalPage(res.last_page);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         setLoading(false);
       });
     return;
@@ -52,7 +51,7 @@ function CommentScreen(props) {
   const paginate = () => {
     if (loading) return;
     if (totalPage > 1 && currentPage < totalPage) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage((prev) => prev + 1);
       fetchData(currentPage + 1);
     }
   };
@@ -71,12 +70,12 @@ function CommentScreen(props) {
     sendData.append('content', message);
     getApi
       .postData('postComment', sendData)
-      .then(res => {
+      .then((res) => {
         setLoading(false);
         setMessage('');
         fetchData(1);
       })
-      .catch(err => {
+      .catch((err) => {
         setLoading(false);
       });
   };
@@ -153,20 +152,49 @@ function CommentScreen(props) {
             کریں۔
           </Text>
         </View>
-        {comments.map(comment => {
+        {comments.map((comment) => {
           return (
             <View key={comment.id}>
-              <View style={styles.postBox}>
-                <Flex direction="row" align="center">
-                  <Text style={styles.commentTitle}>
-                    {props.authUser.firstname + ' ' + props.authUser.lastname}
+              {comment.is_chat === 1 ? (
+                <View style={styles.postBox}>
+                  <Flex direction="row" align="center">
+                    <Text style={styles.commentTitle}>
+                      {props.authUser.firstname + ' ' + props.authUser.lastname}
+                    </Text>
+                    <Text style={styles.commentTime}>
+                      {moment(comment.created_at).format('DD MMM hh:mm a')}
+                    </Text>
+                  </Flex>
+                  <Text style={styles.commentContent}>{comment.content}</Text>
+                </View>
+              ) : (
+                <View
+                  style={[
+                    styles.postBox,
+                    {
+                      backgroundColor:
+                        comment.status === 0
+                          ? Colors.black_text
+                          : Colors.green_text,
+                    },
+                  ]}>
+                  <Flex direction="row" align="center">
+                    <Text style={styles.commentTitle}>Withdraw Request</Text>
+                    <Text style={styles.commentTime}>
+                      {moment(comment.replyed_at).format('DD MMM hh:mm a')}
+                    </Text>
+                  </Flex>
+                  <Text style={styles.commentContent}>
+                    Coins: {comment.content}
                   </Text>
-                  <Text style={styles.commentTime}>
-                    {moment(comment.created_at).format('DD MMM hh:mm a')}
+                  <Text style={styles.commentContent}>
+                    Bkash Number: {comment.funds}
                   </Text>
-                </Flex>
-                <Text style={styles.commentContent}>{comment.content}</Text>
-              </View>
+                  <Text style={styles.commentContent}>
+                    Status: {comment.status === 1 ? 'Complete' : 'Pending'}
+                  </Text>
+                </View>
+              )}
               {comment.reply && (
                 <View style={styles.postBox}>
                   <Flex direction="row" align="center">
@@ -197,7 +225,7 @@ function CommentScreen(props) {
             borderWidth={0}
             borderBottomWidth={0.5}
             borderColor="rgba(209, 209, 209, 0.17)"
-            onChangeText={val => {
+            onChangeText={(val) => {
               setMessage(val);
               if (!val)
                 setErrors({

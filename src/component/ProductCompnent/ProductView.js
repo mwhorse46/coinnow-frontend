@@ -14,6 +14,7 @@ import {
 import moment from 'moment';
 import FastImage from 'react-native-fast-image';
 import { Grayscale } from 'react-native-color-matrix-image-filters';
+import { imageNotFound } from '../../common';
 
 function ProductView(props) {
   const data = props.data || {};
@@ -60,26 +61,14 @@ function ProductView(props) {
           {data.quantity > 0 || data.sellers_count > 0 ? (
             <FastImage
               style={[styles.image]}
-              source={{
-                uri: data.image
-                  ? 'https://my.inventory.marketmajesty.net/uploads/product/' +
-                    data.image
-                  : 'https://my.inventory.marketmajesty.net/uploads/assets/img/default.png',
-                priority: FastImage.priority.high,
-              }}
+              source={imageNotFound}
               resizeMode={FastImage.resizeMode.cover}
             />
           ) : (
             <Grayscale>
               <FastImage
                 style={[styles.image]}
-                source={{
-                  uri: data.image
-                    ? 'https://my.inventory.marketmajesty.net/uploads/product/' +
-                      data.image
-                    : 'https://my.inventory.marketmajesty.net/uploads/assets/img/default.png',
-                  priority: FastImage.priority.high,
-                }}
+                source={imageNotFound}
                 resizeMode={FastImage.resizeMode.cover}
               />
             </Grayscale>
@@ -89,64 +78,46 @@ function ProductView(props) {
           <Text style={styles.title} numberOfLines={2}>
             {data?.product_description?.name}
           </Text>
-          {special > 0 ? (
-            data.quantity > 0 || data.sellers_count > 0 ? (
-              <View style={styles.SpcialView}>
-                <View style={GlobalStyles.coinWrapper}>
-                  <Image source={coinImage} style={GlobalStyles.coinImage} />
-                  <Text style={styles.price}>{numberWithComma(special)} </Text>
-                </View>
-
-                <Text style={styles.price}>
-                  <Image source={coinImage} style={GlobalStyles.coinImage} />
-                  {numberWithComma(data.price)}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.SpcialView}>
-                <View style={GlobalStyles.coinWrapper}>
-                  <Text style={styles.notAvailable}>Not Available</Text>
-                </View>
-              </View>
-            )
-          ) : data.quantity > 0 || data.sellers_count > 0 ? (
-            <View style={GlobalStyles.coinWrapper}>
-              <Image source={coinImage} style={GlobalStyles.coinImage} />
-              <Text style={[styles.price]}>{numberWithComma(data.price)}</Text>
-            </View>
-          ) : (
-            <View style={GlobalStyles.coinWrapper}>
-              <Text style={[styles.notAvailable]}>Not Available</Text>
-            </View>
-          )}
-          <Text style={styles.manufacturer}>
-            {data.product_manufacturer ? data.product_manufacturer.name : ''}
-          </Text>
         </View>
       </View>
-      {(data.quantity > 0 || data.sellers_count > 0) && (
-        <View style={styles.infromationView}>
-          <View style={styles.priceView}>
-            <Text
-              style={[
-                styles.priceChange,
-                productChange < 0
-                  ? { color: Colors.red }
-                  : { color: '#05FF00' },
-              ]}>
-              {productChange >= 0 ? '+' : '-'}
-              {Math.abs(productChange)}
-            </Text>
+      <View>
+        {special > 0 ? (
+          data.quantity > 0 || data.sellers_count > 0 ? (
+            <View style={styles.SpcialView}>
+              <View style={GlobalStyles.coinWrapper}>
+                <Image source={coinImage} style={GlobalStyles.coinImage} />
+                <Text style={styles.price}>{numberWithComma(special)} </Text>
+              </View>
 
-            {off != null && <Text style={styles.offerTxt}>{off} </Text>}
+              <Text style={styles.price}>
+                <Image source={coinImage} style={GlobalStyles.coinImage} />
+                {numberWithComma(data.price)}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.SpcialView}>
+              <View style={GlobalStyles.coinWrapper}>
+                <Text style={styles.notAvailable}>Not Available</Text>
+              </View>
+            </View>
+          )
+        ) : data.quantity > 0 || data.sellers_count > 0 ? (
+          <View style={GlobalStyles.coinWrapper}>
+            <Image source={coinImage} style={GlobalStyles.coinImage} />
+            <Text style={[styles.price]}>{numberWithComma(data.price)}</Text>
           </View>
-        </View>
-      )}
+        ) : (
+          <View style={GlobalStyles.coinWrapper}>
+            <Text style={[styles.notAvailable]}>Not Available</Text>
+          </View>
+        )}
+      </View>
       {data.quantity == 0 && (
         <View style={GlobalStyles.outstockview}>
           <Text style={GlobalStyles.outofstockTxt}>Out of stock</Text>
         </View>
       )}
+
       {data.quantity > 0 && data.new == true && (
         <View style={GlobalStyles.newtextView}>
           <Text style={GlobalStyles.newTxt}>New</Text>
@@ -160,12 +131,11 @@ export default ProductView;
 
 const styles = StyleSheet.create({
   productBox: {
-    justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 13,
     width: '100%',
     maxWidth: wp('100%'),
-    backgroundColor: 'black',
+    backgroundColor: '',
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: 78,
@@ -273,6 +243,9 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   description: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginLeft: 15,
     marginTop: 5,
   },

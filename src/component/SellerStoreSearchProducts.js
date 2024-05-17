@@ -34,19 +34,6 @@ function SellerStoreSearchProducts(props) {
   let item = props.product || {};
 
   let special = 0;
-  let off = '';
-  const seller = item?.seller || {};
-  // let startDate = moment(item.product.special?.special?.start_date, 'DD/MM/YYYY');
-  // let endDate = moment(item.special?.special?.end_date, 'DD/MM/YYYY');
-  // if (
-  //   startDate <= moment(new Date(), 'DD/MM/YYYY') &&
-  //   endDate >= moment(new Date(), 'DD/MM/YYYY')
-  // ) {
-  //   special = item.special?.price;
-  //   off =
-  //     calculateOffPercentage(item.special?.price, item.special?.special.price) + '% off';
-  // }
-  const { firstname, lastname, power } = seller;
 
   const onPressBuy = async () => {
     setUserConfirm(false);
@@ -62,15 +49,15 @@ function SellerStoreSearchProducts(props) {
     <Pressable
       style={styles.cartContent}
       key={item.id}
-      // onPress={() =>
-      //   props.navigation.navigate('ProductDetailScreen', { id: item.id })
-      // }
       onLongPress={() => {
         props.onLongPress && props.onLongPress(item);
       }}>
       <View
         style={[
           styles.cartBox,
+          props.isMine && {
+            backgroundColor: '#0F001B',
+          },
           item.sale == '0' && {
             backgroundColor: '#363636',
           },
@@ -103,11 +90,26 @@ function SellerStoreSearchProducts(props) {
                 color: Colors.white,
                 fontWeight: '700',
                 marginLeft: 12,
+                fontSize: wp('4.8%'),
               }}>
               X{item.quantity}
             </Text>
           </View>
 
+          {/* {!!off && <Text style={styles.offerTxt}>{off} </Text>}
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text>merchant power</Text>
+            <Text style={{ color: 'red' }}>{` (${power})`}</Text>
+          </View> */}
+        </View>
+        <View
+          style={{
+            alignItems: 'flex-end',
+            paddingRight: 20,
+          }}>
           {special > 0 ? (
             <View style={styles.SpcialView}>
               <View style={GlobalStyles.coinWrapper}>
@@ -128,39 +130,6 @@ function SellerStoreSearchProducts(props) {
                 {numberWithComma(item?.product?.price * item.quantity)}
               </Text>
             </View>
-          )}
-
-          {/* {!!off && <Text style={styles.offerTxt}>{off} </Text>}
-          <View
-            style={{
-              flexDirection: 'row',
-            }}>
-            <Text>merchant power</Text>
-            <Text style={{ color: 'red' }}>{` (${power})`}</Text>
-          </View> */}
-        </View>
-        <View style={{ paddingRight: 12, alignItems: 'flex-end' }}>
-          {item.sale == '1' ? (
-            !props.isMine && (
-              <Button
-                isLoading={buying}
-                size="md"
-                variant="solid"
-                bg={Colors.themeColor}
-                style={[
-                  { borderRadius: 10, backgroundColor: 'white' },
-                  item?.product?.image_profit != null && {
-                    backgroundColor: '#0047FF',
-                  },
-                ]}
-                onPress={() => setUserConfirm(true)}>
-                <Text style={{ color: 'black' }}>
-                  {buying ? 'Processing' : 'Buy Now'}
-                </Text>
-              </Button>
-            )
-          ) : (
-            <Text></Text>
           )}
         </View>
       </View>
@@ -202,14 +171,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.white,
     justifyContent: 'center',
-    shadowColor: 'grey',
-    shadowOffset: { width: 0, height: 0.4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
     elevation: 6,
-    marginTop: wp('3%'),
     marginBottom: wp('3%'),
-    borderRadius: wp('2%'),
+    borderRadius: wp('10%'),
     marginLeft: wp('1%'),
   },
   cartBox: {
@@ -220,13 +184,13 @@ const styles = StyleSheet.create({
     width: wp('100%'),
     flex: 1,
     backgroundColor: '#000B42',
-    borderRadius: 6,
+    borderRadius: 15,
   },
   imageView: {
     backgroundColor: Colors.light_white,
     //height: hp('11%'),
     height: '100%',
-    borderRadius: wp('1.5%'),
+    borderRadius: 15,
   },
   image: {
     resizeMode: 'cover',
@@ -234,7 +198,7 @@ const styles = StyleSheet.create({
     height: '100%',
     aspectRatio: 1,
     width: wp('21.5%'),
-    borderRadius: wp('1.5%'),
+    borderRadius: 15,
   },
   infromationView: {
     flex: 1,
@@ -245,7 +209,7 @@ const styles = StyleSheet.create({
   name: {
     textAlign: 'center',
     color: Colors.white,
-    fontSize: wp('3.8%'),
+    fontSize: wp('4.8%'),
     fontFamily: Fonts.Font_Bold,
   },
   // price: {

@@ -170,3 +170,10 @@ export function doLogout() {
     payload: {},
   };
 }
+
+export function getBackgroundImage(data) {
+  return {
+    type: types.GET_BACKGROUND_IMAGE,
+    payload: data,
+  };
+}

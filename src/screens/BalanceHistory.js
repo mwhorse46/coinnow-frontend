@@ -38,21 +38,23 @@ function BalanceHistory(props) {
   });
   const { historyList, totalPages, currentPage, loading, loader } = state;
 
-  const fetchData = page => {
-    getApi.getData('seller/balanceHistory?page=' + page, []).then(response => {
-      if (response.status == 1) {
-        setState(prevstate => ({
-          ...prevstate,
-          historyList:
-            page == 1
-              ? response.data.data
-              : [...prevstate.historyList, ...response.data.data],
-          totalPages: response.data.last_page,
-          loading: false,
-          loader: false,
-        }));
-      }
-    });
+  const fetchData = (page) => {
+    getApi
+      .getData('seller/balanceHistory?page=' + page, [])
+      .then((response) => {
+        if (response.status == 1) {
+          setState((prevstate) => ({
+            ...prevstate,
+            historyList:
+              page == 1
+                ? response.data.data
+                : [...prevstate.historyList, ...response.data.data],
+            totalPages: response.data.last_page,
+            loading: false,
+            loader: false,
+          }));
+        }
+      });
   };
 
   useEffect(() => {
@@ -89,7 +91,7 @@ function BalanceHistory(props) {
     <BalanceHistoryItem navigation={props.navigation} history={item} />
   );
 
-  const currentBalance = data => {
+  const currentBalance = (data) => {
     const { type, price, balance, quantity, amount } = data;
     let balanceNew = 0;
     let diff;

@@ -38,6 +38,7 @@ export { default as ShippingDeliveryScreen } from './ShippingDeliveryScreen.js';
 export { default as DMSList } from './DMSList';
 export { default as DMChat } from './DMChat';
 export { default as InventoryLog } from './InventoryLog.js';
+export { default as Withdraw } from './Withdraw.js';
 export { default as GuideScreen } from './GuideScreen.js';
 export { default as CommentScreen } from './CommentScreen.js';
 export { default as CoinPacks } from './CoinPacks.js';

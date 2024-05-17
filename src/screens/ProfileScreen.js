@@ -102,10 +102,12 @@ function ProfileScreen(props) {
         setMessages(res);
       });
   };
+  console.log({ authStatus: props.authStatus });
 
   const onLogout = () => {
     props.doLogout();
     getApi.getData('seller/logout', []).then(response => {});
+
     Toast.show('Successfully Logout', {
       duration: 2000,
       position: Toast.positions.CENTER,
@@ -142,38 +144,32 @@ function ProfileScreen(props) {
         }}>
         <TouchableOpacity
           style={{
-            marginTop: 15,
-            backgroundColor: 'black',
-            justifyContent: 'center',
-            borderRadius: 50,
-          }}>
-          <Image
-            source={digital}
-            style={{ height: 80, width: 80, borderRadius: 40 }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            alignItems: 'flex-start',
-            marginTop: 15,
-            backgroundColor: 'black',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 12,
+            backgroundColor: '#582758',
             paddingVertical: 12,
             paddingHorizontal: 24,
             borderRadius: 15,
-            width: '70%',
+            width: '98%',
           }}
           onPress={() => props.navigation.navigate('BalanceHistory')}>
-          <Text
-            style={{
-              fontSize: 16,
-              color: '#D2D2D2',
-              textTransform: 'uppercase',
-            }}>
-            {authData && authData.firstname} {authData && authData.lastname}
-          </Text>
-          <Text style={[{ color: '#D2D2D2', fontSize: 12, lineHeight: 14.02 }]}>
-            {authData && authData.email}
-          </Text>
+          <View>
+            <Text
+              style={{
+                fontSize: 16,
+                color: '#D2D2D2',
+                textTransform: 'uppercase',
+              }}>
+              {authData && authData.firstname} {authData && authData.lastname}
+            </Text>
+            <Text
+              style={[{ color: '#D2D2D2', fontSize: 12, lineHeight: 14.02 }]}>
+              {authData && authData.email}
+            </Text>
+          </View>
           <View style={[GlobalStyles.coinWrapper]}>
             <Image
               source={coinImage}
@@ -191,9 +187,7 @@ function ProfileScreen(props) {
               {authData?.balance || 0}
             </Text>
           </View>
-          <Text style={[{ color: '#D2D2D2', fontSize: 12, lineHeight: 14.02 }]}>
-            Transfer Limit: {authData && authData.withdraw_limit}
-          </Text>
+
           {authData?.verified ? (
             <View
               style={{
@@ -244,6 +238,11 @@ function ProfileScreen(props) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.linkButton}
+            onPress={() => props.navigation.navigate('Withdraw')}>
+            <Text style={styles.linkText}>Withdraw</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.linkButton}
             onPress={() => props.navigation.navigate('news')}>
             <Text style={styles.linkText}>News</Text>
           </TouchableOpacity>
@@ -266,11 +265,6 @@ function ProfileScreen(props) {
             style={styles.linkButton}
             onPress={() => props.navigation.navigate('Earnings')}>
             <Text style={styles.linkText}>Earnings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.linkButton}
-            onPress={() => props.navigation.navigate('CommentScreen')}>
-            <Text style={styles.linkText}>Support</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.linkButton}
@@ -441,6 +435,7 @@ function ProfileScreen(props) {
 function mapStateToProps(state) {
   return {
     cartData: state.cart.cartData,
+    authStatus: state.auth.USER_AUTH,
     customerData: state.auth.USER_DATA,
     buttonImages: state.auth.PROFILE_BUTTON_IMAGES,
     specialItems: state.auth.PROFILE_SPECIAL_ITEMS,
@@ -624,7 +619,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   linkButton: {
-    backgroundColor: '#0047FF',
+    backgroundColor: '#000B42',
     width: 60,
     height: 60,
     margin: 10,
@@ -637,5 +632,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 10,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
 });

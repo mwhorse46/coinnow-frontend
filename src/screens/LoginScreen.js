@@ -4,12 +4,12 @@ import {
   OtrixContainer,
   OtrixHeader,
   OtrixContent,
-  OtrixDivider,
   OtrixAlert,
   OtrixLoader,
 } from '@component';
 import { Input, Text, FormControl, Button, InfoOutlineIcon } from 'native-base';
 import { connect } from 'react-redux';
+import getApi from '@apis/getApi';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -20,12 +20,10 @@ import { logfunction } from '@helpers/FunctionHelper';
 import Fonts from '../helpers/Fonts';
 import { bindActionCreators } from 'redux';
 import { doLogin } from '@actions';
-import getApi from '@apis/getApi';
 import Toast from 'react-native-root-toast';
 import FBSDK, { LoginManager } from 'react-native-fbsdk';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { backgroundImage } from '../common/config';
-const { AccessToken, GraphRequest, GraphRequestManager } = FBSDK;
+const { GraphRequest, GraphRequestManager } = FBSDK;
 GoogleSignin.configure({
   scopes: ['https://www.google.com/m8/feeds/'],
   webClientId: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
@@ -45,8 +43,6 @@ function LoginScreen(props) {
   const [state, setDatapassword] = React.useState({ secureEntry: true });
   const [errors, setErrors] = React.useState({});
   const { email, password, submited, loading, message, type, navTo } = formData;
-
-  useEffect(() => {}, [props.authStatus]);
 
   const validate = () => {
     setData({ ...formData, submited: true });
@@ -88,7 +84,7 @@ function LoginScreen(props) {
       sendData.append('password', password);
       try {
         const route = mode === 'seller' ? 'seller/login' : 'user/login';
-        getApi.postData(route, sendData).then(response => {
+        getApi.postData(route, sendData).then((response) => {
           console.log({ response });
           logfunction('RESPONSE ', response);
           if (response.status == 1) {
@@ -130,7 +126,7 @@ function LoginScreen(props) {
   const _fbAuth = () => {
     // Attempt a login using the Facebook login dialog asking for default permissions and email.
     LoginManager.logInWithPermissions(['public_profile', 'email']).then(
-      result => {
+      (result) => {
         if (result.isCancelled) {
         } else {
           const responseInfoCallback = async (error, result) => {
@@ -158,45 +154,49 @@ function LoginScreen(props) {
 
               //login to our server 🧛🏻‍♀️
               try {
-                getApi.postData('user/socialLogin', sendData).then(response => {
-                  logfunction('Social RESPONSE ', response);
-                  if (response.status == 1) {
-                    logfunction('RESPONSE ', 'Success');
-                    setData({
-                      ...formData,
-                      email: null,
-                      password: null,
-                      loading: false,
-                    });
-                    props.doLogin(response, navTo);
-                  } else {
-                    //navigation part  😎
-                    if (response.new == 1) {
-                      props.navigation.navigate('SocialRegisterScreen', {
-                        s_email: email,
-                        s_socialID: result.id,
-                        s_image: image,
-                        s_firstName: result.first_name ? result.first_name : '',
-                        s_lastName: result.last_name ? result.last_name : '',
-                        s_creation: 'F',
-                      });
-                    } else {
+                getApi
+                  .postData('user/socialLogin', sendData)
+                  .then((response) => {
+                    logfunction('Social RESPONSE ', response);
+                    if (response.status == 1) {
+                      logfunction('RESPONSE ', 'Success');
                       setData({
                         ...formData,
-                        type: 'error',
-                        message: response.message,
+                        email: null,
+                        password: null,
                         loading: false,
                       });
-                      setTimeout(() => {
+                      props.doLogin(response, navTo);
+                    } else {
+                      //navigation part  😎
+                      if (response.new == 1) {
+                        props.navigation.navigate('SocialRegisterScreen', {
+                          s_email: email,
+                          s_socialID: result.id,
+                          s_image: image,
+                          s_firstName: result.first_name
+                            ? result.first_name
+                            : '',
+                          s_lastName: result.last_name ? result.last_name : '',
+                          s_creation: 'F',
+                        });
+                      } else {
                         setData({
                           ...formData,
-                          message: null,
+                          type: 'error',
+                          message: response.message,
                           loading: false,
                         });
-                      }, 3000);
+                        setTimeout(() => {
+                          setData({
+                            ...formData,
+                            message: null,
+                            loading: false,
+                          });
+                        }, 3000);
+                      }
                     }
-                  }
-                });
+                  });
               } catch (error) {
                 logfunction('Error', error);
                 setData({
@@ -216,7 +216,7 @@ function LoginScreen(props) {
                 },
               },
             },
-            responseInfoCallback,
+            responseInfoCallback
           );
           // Start the graph request.
           new GraphRequestManager().addRequest(infoRequest).start();
@@ -224,7 +224,7 @@ function LoginScreen(props) {
       },
       function (error) {
         alert('Login fail with error: ' + error);
-      },
+      }
     );
   };
 
@@ -248,7 +248,7 @@ function LoginScreen(props) {
 
         //login to our server 🧛🏻‍♀️
         try {
-          getApi.postData('user/socialLogin', sendData).then(response => {
+          getApi.postData('user/socialLogin', sendData).then((response) => {
             logfunction('Social RESPONSE ', response);
             if (response.status == 1) {
               logfunction('RESPONSE ', 'Success');
@@ -311,7 +311,7 @@ function LoginScreen(props) {
       logfunction('Errors ', error);
     }
   };
-
+  console.log(props.backgroundImage);
   return (
     <OtrixContainer
       customStyles={{
@@ -319,8 +319,8 @@ function LoginScreen(props) {
         position: 'relative',
       }}>
       <Image
-        source={backgroundImage}
-        style={{ width: '100%', height: '100%', borderRadius: 20, zIndex: -1 }}
+        source={{ uri: props.backgroundImage }}
+        style={{ width: '100%', height: '100%', zIndex: -1 }}
       />
       {/* Header */}
       <View style={{ position: 'absolute', top: 0 }}>
@@ -355,7 +355,7 @@ function LoginScreen(props) {
               }}
               placeholderTextColor="white"
               value={email}
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, email: value }),
                   delete errors.email,
                   delete errors.invalidEmail;
@@ -393,7 +393,7 @@ function LoginScreen(props) {
                 fontSize: 18,
                 fontWeight: '700',
               }}
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setData({ ...formData, submited: false, password: value }),
                   delete errors.password;
               }}
@@ -469,15 +469,19 @@ function LoginScreen(props) {
 }
 
 function mapStateToProps(state) {
-  return { authStatus: state.auth.USER_AUTH };
+  console.log({ state });
+  return {
+    authStatus: state.auth.USER_AUTH,
+    backgroundImage: state.mainScreenInit.backgroundImage,
+  };
 }
 
-const mapDispatchToProps = dispatch =>
+const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       doLogin,
     },
-    dispatch,
+    dispatch
   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

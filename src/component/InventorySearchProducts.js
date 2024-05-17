@@ -19,60 +19,47 @@ import moment from 'moment';
 import getApi from '@apis/getApi';
 import { Button } from 'native-base';
 
-const ProductItem = props => {
+const ProductItem = (props) => {
   const item = props.item || {};
-  // const [timing, setTiming] = useState(0);
-  const [message, setMessage] = useState({
-    message: '',
-    type: 'success',
-  });
   const [loading, setLoading] = useState(false);
-  // let counter = useRef(null);
-  // useEffect(() => {
-  //   if (counter.current) {
-  //     clearInterval(counter.current);
-  //   }
-  //   const now = new Date();
-  //   const updatedDate = new Date(props.item?.pivot.updated_at);
-  //   const seconds = (now.getTime() - updatedDate.getTime()) / 1000;
-  //   if (seconds / 3600 >= 2 || props.item.pivot.sale == 1) {
-  //     setTiming(0);
-  //     clearInterval(counter.current);
-  //   } else {
-  //     setTiming(Math.floor(3600 * 2 - seconds));
-  //     counter.current = setInterval(() => {
-  //       setTiming(prevState => prevState - 1);
-  //     }, 1000);
-  //   }
 
-  //   return () => {
-  //     clearInterval(counter.current);
-  //   };
-  // }, [props.item]);
-
-  const onPressSale = id => {
+  const onPressSale = (id) => {
     setLoading(true);
     let sendData = new FormData();
     sendData.append('sale', 1);
     sendData.append('quantity', props.item.quantity);
     sendData.append('product_id', props.item.product_description.product_id);
     sendData.append('price', props.item.price);
-    getApi.postData(`seller/listProductSale/${id}`, sendData).then(response => {
-      logfunction('response ', response);
-      // alert(JSON.stringify(response))
-      props.getData('').then(() => {
-        setLoading(false);
+    getApi
+      .postData(`seller/listProductSale/${id}`, sendData)
+      .then((response) => {
+        console.log({ response });
+        logfunction('response ', response);
+        // alert(JSON.stringify(response))
+        props.getData('').then(() => {
+          setLoading(false);
+        });
       });
-    });
   };
-
-  // useEffect(() => {
-  //   if (timing < 0) {
-  //     clearInterval(counter.current);
-  //   }
-  // }, [timing]);
-
-  // const formatted = new Date(timing * 1000).toISOString().slice(11, 19);
+  const calculateTimeSoFar = (date) => {
+    let startDate = moment(date);
+    let endDate = moment(new Date());
+    let seconds = endDate.diff(startDate, 'seconds');
+    let minutes = endDate.diff(startDate, 'minutes');
+    let hours = endDate.diff(startDate, 'hours');
+    let days = endDate.diff(startDate, 'days');
+    if (days > 0) {
+      return days + ' days ago';
+    } else if (hours > 0) {
+      return hours + ' hours ago';
+    } else if (minutes > 0) {
+      return minutes + ' minutes ago';
+    } else if (seconds > 0) {
+      return seconds + ' seconds ago';
+    } else {
+      return 'Just Now';
+    }
+  };
   return (
     <View
       style={styles.cartContent}
@@ -93,56 +80,65 @@ const ProductItem = props => {
         </View>
         <View style={styles.infromationView}>
           <TouchableOpacity>
-            <Text style={styles.name}>
-              {item?.product_description?.name} (x{item?.pivot.quantity})
+            <Text style={[styles.name]}>
+              {item?.product_description?.name} X{item?.pivot.quantity}
             </Text>
           </TouchableOpacity>
-
           {item.special > 0 ? (
             <View style={styles.SpcialView}>
               <View style={GlobalStyles.coinWrapper}>
                 <Image source={coinImage} style={GlobalStyles.coinImage} />
-                <Text style={styles.price}>{numberWithComma(special)} </Text>
+                <Text style={styles.price}>
+                  {numberWithComma(item.special)}{' '}
+                </Text>
               </View>
 
               <Text style={styles.originalPrice}>
-                {numberWithComma(item.price)}
+                {numberWithComma(item.price * item.pivot.quantity)}
               </Text>
             </View>
           ) : (
             <View style={GlobalStyles.coinWrapper}>
               <Image source={coinImage} style={GlobalStyles.coinImage} />
-              <Text style={[styles.price]}>{numberWithComma(item.price)}</Text>
+              <Text style={[styles.price]}>
+                {numberWithComma(item.price * item.pivot.quantity)}
+              </Text>
             </View>
           )}
-          <Text style={[styles.originalPrice]}>
-            Buy Price: {numberWithComma(item?.pivot?.origin_price)}
-          </Text>
+          {item?.pivot?.sale === 0 && (
+            <Text style={[styles.originalPrice, { color: 'red' }]}>
+              {calculateTimeSoFar(item.pivot.updated_at)}
+            </Text>
+          )}
           {item.off != null && <Text style={styles.offerTxt}>{item.off} </Text>}
-          {/* {timing ? (
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {formatted}
-            </Text>
-          ) : (
-            <Text style={{ color: 'black', fontWeight: '700' }}>
-              On Marketplace
-            </Text>
-          )} */}
         </View>
         <View style={{ paddingRight: 12 }}>
-          {item?.pivot?.sale == '0' ? (
+          {item?.pivot?.sale === 0 ? (
             <Button
               isLoading={loading}
               style={styles.listNow}
               onPress={() => onPressSale(item.pivot.id)}>
-              <Text style={styles.price}>List Now</Text>
+              <Text style={styles.price}>Sell Now</Text>
             </Button>
           ) : (
             <View style={[styles.listNow, { backgroundColor: 'none' }]}>
-              <Text style={[styles.price, { color: 'black' }]}>Listed</Text>
+              <Text style={[styles.price, { color: 'white' }]}>Listed</Text>
             </View>
           )}
         </View>
+      </View>
+      <View style={styles.taxContent}>
+        <Text style={styles.price}>Buy Price: {item.pivot.origin_price}</Text>
+        <Text style={styles.price}>Current Price: {item.price}</Text>
+        {item?.pivot?.sale === 0 &&
+          item?.pivot?.hourly_tax_list?.split('_')?.map(
+            (tax, idx) =>
+              tax !== '' && (
+                <Text key={idx} style={styles.price}>
+                  Hour {idx + 1} Tax: {tax}
+                </Text>
+              )
+          )}
       </View>
     </View>
   );
@@ -185,8 +181,9 @@ export default React.memo(InventorySearchProducts);
 const styles = StyleSheet.create({
   cartContent: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#36393E',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: '#0F001B',
     justifyContent: 'center',
     shadowColor: 'grey',
     shadowOffset: { width: 0, height: 0.4 },
@@ -204,7 +201,8 @@ const styles = StyleSheet.create({
   },
   imageView: {
     backgroundColor: Colors.light_white,
-    height: '100%',
+    width: wp('20%'),
+    height: wp('20%'),
     borderRadius: wp('1.5%'),
   },
   image: {
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
   price: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '500',
     lineHeight: 20.83,
     textAlign: 'left',
   },
@@ -297,10 +295,16 @@ const styles = StyleSheet.create({
   listNow: {
     width: 91,
     height: 42,
-    backgroundColor: '#222222',
+    backgroundColor: '#8B2500',
     borderRadius: 13,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  taxContent: {
+    backgroundColor: '#000',
+    padding: 10,
+    borderBottomLeftRadius: wp('2%'),
+    borderBottomRightRadius: wp('2%'),
   },
 });

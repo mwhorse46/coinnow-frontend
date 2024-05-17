@@ -21,6 +21,7 @@ import {
   OtrixNotfoundComponent,
   FilterTags,
   FilterComponent,
+  ProductView,
 } from '@component';
 import {
   widthPercentageToDP as wp,
@@ -79,9 +80,8 @@ function ProductListScreen(props) {
     headingTitle,
     filterAplied,
   } = state;
-
   useFocusEffect(() => {
-    echo.channel('chat-channel').listen('.message.new', res => {
+    echo.channel('chat-channel').listen('.message.new', (res) => {
       if (res.sender == 'price update') {
         let { data } = state;
         for (let i = 0; i < data?.length; i++) {
@@ -106,7 +106,7 @@ function ProductListScreen(props) {
     filterApplied = false,
     range,
     fprice = null,
-    frating = null,
+    frating = null
   ) => {
     let url = '';
     if (type == 'category') {
@@ -138,11 +138,11 @@ function ProductListScreen(props) {
     logfunction('FILTER ', filterApplied);
 
     try {
-      getApi.getData(url, []).then(response => {
+      getApi.getData(url, []).then((response) => {
         if (response.status == 1) {
           logfunction('PRODUUC RESPONSE ', response);
 
-          setState(prevstate => ({
+          setState((prevstate) => ({
             ...prevstate,
             data:
               filterApplied == true
@@ -160,12 +160,12 @@ function ProductListScreen(props) {
   };
 
   //fetch data fro new,deals of the day and trending products
-  const fetchDataForNDT = url => {
+  const fetchDataForNDT = (url) => {
     logfunction('PRODUCT LIST ', url);
-    getApi.getData(url, []).then(response => {
+    getApi.getData(url, []).then((response) => {
       if (response.status == 1) {
         logfunction('PRODUUCT RESPONSE ', response);
-        setState(prevstate => ({
+        setState((prevstate) => ({
           ...prevstate,
           data: response.data,
           loading: false,
@@ -200,7 +200,7 @@ function ProductListScreen(props) {
     if (value != id) {
       logfunction('childCategories ', childCategories);
       logfunction('Value ', value);
-      let index = childCategories.findIndex(c => c.category_id === value);
+      let index = childCategories.findIndex((c) => c.category_id === value);
       logfunction('index ', index);
       title = childCategories[index].category_description?.name;
     }
@@ -216,7 +216,7 @@ function ProductListScreen(props) {
     fetchData(value, 1);
   };
 
-  const addToWishlist = async id => {
+  const addToWishlist = async (id) => {
     logfunction('IDD ', id);
     if (props.USER_AUTH == true) {
       let wishlistData = await _addToWishlist(id);
@@ -237,7 +237,7 @@ function ProductListScreen(props) {
     }
   };
 
-  const applyFilter = val => {
+  const applyFilter = (val) => {
     setState({
       ...state,
       // filterPriceRange: val,
@@ -252,7 +252,7 @@ function ProductListScreen(props) {
     }, 300);
   };
 
-  const closeFilterModel = clearFilter => {
+  const closeFilterModel = (clearFilter) => {
     logfunction('CLEAR ', clearFilter);
     if (clearFilter) {
       setState({
@@ -314,11 +314,9 @@ function ProductListScreen(props) {
   const { wishlistData } = props;
 
   return (
-    <OtrixContainer
-      customStyles={{ backgroundColor: Colors.backgroundColor_dark }}>
+    <OtrixContainer customStyles={{ backgroundColor: Colors.black_text }}>
       {/* Header */}
-      <OtrixHeader
-        customStyles={{ backgroundColor: Colors.backgroundColor_dark }}>
+      <OtrixHeader customStyles={{ backgroundColor: Colors.black_text }}>
         <TouchableOpacity
           style={[GlobalStyles.headerLeft, { flexShrink: 1, marginLeft: 0 }]}
           onPress={() => props.navigation.goBack()}>
@@ -327,24 +325,16 @@ function ProductListScreen(props) {
         <View style={[GlobalStyles.headerCenter]}>
           <Text style={GlobalStyles.headingTxt}>{title}</Text>
         </View>
-        {/*{type == 'category' || type == 'menufacturer' ? (*/}
-        {/*  <TouchableOpacity*/}
-        {/*    style={GlobalStyles.headerRight}*/}
-        {/*    onPress={() => setState({ ...state, filterModelVisible: true })}>*/}
-        {/*    <Image source={filter} style={styles.filter} />*/}
-        {/*  </TouchableOpacity>*/}
-        {/*) : (*/}
-        {/*  <View style={{ flex: 0.1 }} />*/}
-        {/*)}*/}
         <LiveUpdate />
       </OtrixHeader>
       <View
         style={{
-          backgroundColor: '#222222',
+          backgroundColor: Colors.description_box_color,
           borderRadius: 13,
           paddingVertical: 10,
           paddingHorizontal: 10,
           marginHorizontal: 20,
+          marginBottom: 10,
         }}>
         <Text
           style={{
@@ -354,7 +344,6 @@ function ProductListScreen(props) {
         </Text>
       </View>
 
-      <OtrixDivider size={'sm'} />
       {/* Horizontal Tag List */}
       {childCategories.length > 0 && (
         <View style={{ height: hp('6%') }}>
@@ -386,7 +375,14 @@ function ProductListScreen(props) {
 
       {/* Content Start from here */}
       {loading ? (
-        <ProductListSkeleton />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Colors.black_text,
+          }}
+        />
       ) : (
         <View style={styles.content}>
           {data.length > 0 ? (
@@ -394,28 +390,23 @@ function ProductListScreen(props) {
               style={{ padding: wp('1%') }}
               data={data}
               horizontal={false}
-              numColumns={2}
               onEndReachedThreshold={0.2}
               showsVerticalScrollIndicator={false}
               keyExtractor={(contact, index) => String(index)}
-              ListFooterComponent={renderFooter}
               onEndReached={({ distanceFromEnd }) => {
                 paginate();
               }}
               renderItem={({ item, index }) => (
-                <FlatListProductView
-                  data={item}
-                  key={item.id}
-                  imageViewBg={Colors.backgroundColor_dark}
-                  navToDetail={() => {
-                    props.navigation.navigate('ProductDetailScreen', {
-                      data: item,
-                    });
-                  }}
-                  addToWishlist={() => addToWishlist}
-                  wishlistArray={wishlistData}
-                  customerData={props.customerData}
-                />
+                <View style={{ marginBottom: hp('2%') }}>
+                  <ProductView
+                    data={item}
+                    navToDetail={() => {
+                      props.navigation.navigate('ProductDetailScreen', {
+                        data: item,
+                      });
+                    }}
+                  />
+                </View>
               )}
               contentContainerStyle={{ paddingBottom: 24 }}
             />
@@ -451,12 +442,12 @@ function mapStateToProps(state) {
   };
 }
 
-const mapDispatchToProps = dispatch =>
+const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       addToWishList,
     },
-    dispatch,
+    dispatch
   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductListScreen);

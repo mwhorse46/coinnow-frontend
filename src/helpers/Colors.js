@@ -28,7 +28,7 @@ export const Colors = {
   light_gray_text: '#EEEEEE',
   light_white_text: '#FAFAFA',
   tab_bar_color: 'rgb(250,250,250)',
-
+  description_box_color: 'rgb(14,11,21)',
   themeGreen: 'rgb(0,118,22)',
   yellow_text: 'rgb(250,200,0)',
   transparent: '#ffffff00',

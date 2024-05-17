@@ -17,6 +17,9 @@ const getDataService = {
         headers: authHeader,
       })
         .then(response => {
+          if (!response.ok) {
+            reject('Network response was not ok');
+          }
           return response.json();
         })
         .then(json => {
@@ -27,7 +30,6 @@ const getDataService = {
           }
         })
         .catch(function (error) {
-          // ADD THIS THROW error
           reject(error);
         });
     });

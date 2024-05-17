@@ -4,6 +4,7 @@ import { logfunction } from '../../helpers/FunctionHelper';
 const initialState = {
   loadApplication: false,
   navScreen: '',
+  backgroundImage: '',
 };
 export default (state = initialState, action) => {
   logfunction('STATE LOG ====', action.type);
@@ -18,6 +19,11 @@ export default (state = initialState, action) => {
         ...state,
         loadApplication: true,
         navScreen: action.payload.navigateScreen,
+      };
+    case types.GET_BACKGROUND_IMAGE:
+      return {
+        ...state,
+        backgroundImage: action.payload,
       };
     default:
       return state;
