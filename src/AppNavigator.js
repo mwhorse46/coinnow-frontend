@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, StyleSheet, Image, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import {
   NavigationContainer,
   createNavigationContainerRef,
@@ -7,6 +7,7 @@ import {
 } from '@react-navigation/native';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import getApi from '@apis/getApi';
+import { doLogin, requestInit } from '@actions';
 import { useDispatch } from 'react-redux';
 import {
   createStackNavigator,
@@ -74,7 +75,6 @@ import {
 } from './screens/index';
 import SendCoin from './screens/SendCoin';
 import BalanceHistory from './screens/BalanceHistory';
-
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -88,7 +88,9 @@ import News from './screens/News';
 import ClansPacks from './screens/ClansPacks';
 import { setNewProducts, getBackgroundImage } from './redux/Action/general';
 import MyTabs from './MyTab';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const SettingStack = createStackNavigator();
+const newProductStore = require('../productStore');
 export const navigationRef = createNavigationContainerRef();
 
 export function navigate(name, params) {
@@ -137,23 +139,55 @@ function AuthNavigator() {
     </AuthStack.Navigator>
   );
 }
-
 const Stack = createStackNavigator();
 function AppNavigator(props) {
-  const { cartCount, authStatus, userData } = props;
+  const { authStatus } = props;
   const dispatch = useDispatch();
+
   useEffect(() => {
+    const getButtonImages = () => {
+      getApi.getData('getButtonImages').then(response => {
+        const background = response.find(item => item.type === 5).image;
+        dispatch(
+          getBackgroundImage(`${process.env.ASSETS_DIR}button/${background}`),
+        );
+      });
+    };
     getButtonImages();
+    props.setNewProducts(newProductStore);
   }, []);
-  const getButtonImages = () => {
-    getApi.getData('getButtonImages').then((response) => {
-      const background = response.find((item) => item.type === 5).image;
-      console.log({ background });
-      dispatch(
-        getBackgroundImage(`${process.env.ASSETS_DIR}button/${background}`)
-      );
-    });
-  };
+  useEffect(() => {
+    const autoLogin = async () => {
+      let userData = await AsyncStorage.getItem('CUSTOMER_DATA');
+      userData = JSON.parse(userData);
+      if (userData?.email) {
+        const response = {
+          data: userData,
+          cartCount: 0,
+          wishlistData: [],
+          status: 1,
+        };
+        props.doLogin(response, 'HomeScreen', 'seller');
+      } else {
+        props.requestInit(false);
+      }
+    };
+    autoLogin();
+  }, []);
+  if (props.loadApplication) {
+    return (
+      <ActivityIndicator
+        size="large"
+        color={Colors.primary}
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'black',
+        }}
+      />
+    );
+  }
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -599,16 +633,19 @@ function mapStateToProps(state) {
     authStatus: state.auth.USER_AUTH,
     userData: state.auth.USER_DATA,
     newProducts: state.cart.newProducts,
+    loadApplication: state.mainScreenInit.loadApplication,
   };
 }
 
-const mapDispatchToProps = (dispatch) =>
+const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       setNewProducts,
       getBackgroundImage,
+      doLogin,
+      requestInit,
     },
-    dispatch
+    dispatch,
   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(AppNavigator);

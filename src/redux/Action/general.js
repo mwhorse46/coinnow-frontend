@@ -1,5 +1,4 @@
 import { types } from './actionTypes';
-import AsyncStorage from '@react-native-community/async-storage';
 import { logfunction } from '../../helpers/FunctionHelper';
 
 export function requestInit(user) {

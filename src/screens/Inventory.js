@@ -37,7 +37,7 @@ function Inventory(props) {
     showMost: true,
     showSuggestions: false,
   });
-
+  const [refetch, setRefetch] = React.useState(false);
   const [total, setTotal] = React.useState({
     quantity: 0,
     price: 0,
@@ -65,28 +65,31 @@ function Inventory(props) {
   }, [state, data]);
 
   useEffect(() => {
-    const unsubscribe = props.navigation.addListener('focus', () => {
-      getData('');
-      getInvestedDigitals();
-    });
-
+    const interval = setInterval(() => {
+      setRefetch(!refetch);
+    }, 60000);
+    return () => clearInterval(interval);
     // Return the function to unsubscribe from the event so it gets removed on unmount
-    return () => unsubscribe();
-  }, [state]);
+  }, [getData, props.navigation, refetch, state]);
+
+  useEffect(() => {
+    getInvestedDigitals();
+    getData('');
+  }, [getData, refetch]);
   const getInvestedDigitals = () => {
     setLoading(true);
     return getApi
       .getData('seller/investedImages')
-      .then((res) => {
+      .then(res => {
         setLoading(false);
         setInvestedDigitals(res);
       })
-      .catch((e) => {
+      .catch(e => {
         console.log(e);
         setLoading(false);
       });
   };
-  const getData = (text) => {
+  const getData = text => {
     if (text.length > -1) {
       return setTimeout(() => {
         if (state.data?.length < 1) {
@@ -95,8 +98,7 @@ function Inventory(props) {
 
         return getApi
           .getData('seller/searchProducts?q=' + text, [])
-          .then((response) => {
-            console.log({ response });
+          .then(response => {
             if (response.status === 1) {
               setState({
                 showSuggestions: true,
@@ -123,7 +125,6 @@ function Inventory(props) {
   };
 
   const { searchKeyword, data, showMost, showSuggestions } = state;
-  console.log({ data });
   return (
     <OtrixContainer customStyles={{ backgroundColor: '#292B2E' }}>
       <OtrixHeader customStyles={{ backgroundColor: '#292B2E' }}>
@@ -158,7 +159,7 @@ function Inventory(props) {
         </View>
       </View>
       <OtrixContent>
-        {showSuggestions && data.length > 0 && (
+        {showSuggestions && data?.length > 0 && (
           <InventorySearchProducts
             navigation={props.navigation}
             products={data}

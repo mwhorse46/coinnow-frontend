@@ -102,7 +102,6 @@ function ProfileScreen(props) {
         setMessages(res);
       });
   };
-  console.log({ authStatus: props.authStatus });
 
   const onLogout = () => {
     props.doLogout();

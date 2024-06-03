@@ -130,6 +130,11 @@ function BalanceHistory(props) {
         balanceNew = balance + price;
         msg = `Congratulations! you won the contest and earned ${price} coins`;
         break;
+      case 'tax_hourly':
+        diff = -price;
+        balanceNew = balance;
+        msg = `2% tax was charged for ${name}`;
+        break;
       default:
         msg = '';
     }

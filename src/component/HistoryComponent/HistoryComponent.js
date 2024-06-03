@@ -118,6 +118,10 @@ function OrdersComponent(props) {
       case 'star_lost':
         msg = 'sorry you lost the contest.. better luck next time';
         break;
+      case 'tax_hourly':
+        balance = '- ' + price;
+        msg = `2% tax was charged for ${name}`;
+        break;
       default:
         msg = '';
         balance = '';

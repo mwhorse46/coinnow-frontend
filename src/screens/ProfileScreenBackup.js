@@ -26,7 +26,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import getApi from '@apis/getApi';
 import { ASSETS_DIR } from '@env';
 import { logfunction } from '@helpers/FunctionHelper';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function ProfileScreen(props) {
   const [state, setState] = React.useState({
@@ -103,8 +103,7 @@ function ProfileScreen(props) {
 
   const onLogout = () => {
     props.doLogout();
-    getApi.getData('seller/logout', []).then(response => {
-    });
+    getApi.getData('seller/logout', []).then(response => {});
     Toast.show('Successfully Logout', {
       duration: 2000,
       position: Toast.positions.CENTER,

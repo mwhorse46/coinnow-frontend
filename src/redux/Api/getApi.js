@@ -6,8 +6,8 @@ var authHeader = new Headers();
 authHeader.append('accept', 'application/json');
 authHeader.append('Content-Type', 'multipart/form-data');
 authHeader.append('token', 'RuQChqz2FqJkP6wMAQiVlLx5BOTRIX');
-const API_URL = 'http://10.0.2.2:8000/api/';
-// const API_URL = 'https://my.inventory.marketmajesty.net/api/';
+// const API_URL = 'http://10.0.2.2:8000/api/';
+const API_URL = 'https://my.inventory.marketmajesty.net/api/';
 const api_url = API_URL;
 const getDataService = {
   getData: function (url) {
@@ -16,11 +16,8 @@ const getDataService = {
         method: 'GET',
         headers: authHeader,
       })
-        .then(response => {
-          if (!response.ok) {
-            reject('Network response was not ok');
-          }
-          return response.json();
+        .then(async response => {
+          return await response.json();
         })
         .then(json => {
           if (json.status == 0 && json.message == 'unauthorize') {

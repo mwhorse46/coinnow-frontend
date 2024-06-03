@@ -2,7 +2,7 @@ import { types } from '../Action/actionTypes';
 import { logfunction } from '../../helpers/FunctionHelper';
 
 const initialState = {
-  loadApplication: false,
+  loadApplication: true,
   navScreen: '',
   backgroundImage: '',
 };
@@ -18,7 +18,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         loadApplication: true,
-        navScreen: action.payload.navigateScreen,
+        navScreen: action.payload,
       };
     case types.GET_BACKGROUND_IMAGE:
       return {

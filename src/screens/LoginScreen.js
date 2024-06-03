@@ -84,8 +84,7 @@ function LoginScreen(props) {
       sendData.append('password', password);
       try {
         const route = mode === 'seller' ? 'seller/login' : 'user/login';
-        getApi.postData(route, sendData).then((response) => {
-          console.log({ response });
+        getApi.postData(route, sendData).then(response => {
           logfunction('RESPONSE ', response);
           if (response.status == 1) {
             logfunction('RESPONSE ', 'Success');
@@ -126,7 +125,7 @@ function LoginScreen(props) {
   const _fbAuth = () => {
     // Attempt a login using the Facebook login dialog asking for default permissions and email.
     LoginManager.logInWithPermissions(['public_profile', 'email']).then(
-      (result) => {
+      result => {
         if (result.isCancelled) {
         } else {
           const responseInfoCallback = async (error, result) => {
@@ -154,49 +153,45 @@ function LoginScreen(props) {
 
               //login to our server 🧛🏻‍♀️
               try {
-                getApi
-                  .postData('user/socialLogin', sendData)
-                  .then((response) => {
-                    logfunction('Social RESPONSE ', response);
-                    if (response.status == 1) {
-                      logfunction('RESPONSE ', 'Success');
+                getApi.postData('user/socialLogin', sendData).then(response => {
+                  logfunction('Social RESPONSE ', response);
+                  if (response.status == 1) {
+                    logfunction('RESPONSE ', 'Success');
+                    setData({
+                      ...formData,
+                      email: null,
+                      password: null,
+                      loading: false,
+                    });
+                    props.doLogin(response, navTo);
+                  } else {
+                    //navigation part  😎
+                    if (response.new == 1) {
+                      props.navigation.navigate('SocialRegisterScreen', {
+                        s_email: email,
+                        s_socialID: result.id,
+                        s_image: image,
+                        s_firstName: result.first_name ? result.first_name : '',
+                        s_lastName: result.last_name ? result.last_name : '',
+                        s_creation: 'F',
+                      });
+                    } else {
                       setData({
                         ...formData,
-                        email: null,
-                        password: null,
+                        type: 'error',
+                        message: response.message,
                         loading: false,
                       });
-                      props.doLogin(response, navTo);
-                    } else {
-                      //navigation part  😎
-                      if (response.new == 1) {
-                        props.navigation.navigate('SocialRegisterScreen', {
-                          s_email: email,
-                          s_socialID: result.id,
-                          s_image: image,
-                          s_firstName: result.first_name
-                            ? result.first_name
-                            : '',
-                          s_lastName: result.last_name ? result.last_name : '',
-                          s_creation: 'F',
-                        });
-                      } else {
+                      setTimeout(() => {
                         setData({
                           ...formData,
-                          type: 'error',
-                          message: response.message,
+                          message: null,
                           loading: false,
                         });
-                        setTimeout(() => {
-                          setData({
-                            ...formData,
-                            message: null,
-                            loading: false,
-                          });
-                        }, 3000);
-                      }
+                      }, 3000);
                     }
-                  });
+                  }
+                });
               } catch (error) {
                 logfunction('Error', error);
                 setData({
@@ -216,7 +211,7 @@ function LoginScreen(props) {
                 },
               },
             },
-            responseInfoCallback
+            responseInfoCallback,
           );
           // Start the graph request.
           new GraphRequestManager().addRequest(infoRequest).start();
@@ -224,7 +219,7 @@ function LoginScreen(props) {
       },
       function (error) {
         alert('Login fail with error: ' + error);
-      }
+      },
     );
   };
 
@@ -248,7 +243,7 @@ function LoginScreen(props) {
 
         //login to our server 🧛🏻‍♀️
         try {
-          getApi.postData('user/socialLogin', sendData).then((response) => {
+          getApi.postData('user/socialLogin', sendData).then(response => {
             logfunction('Social RESPONSE ', response);
             if (response.status == 1) {
               logfunction('RESPONSE ', 'Success');
@@ -355,7 +350,7 @@ function LoginScreen(props) {
               }}
               placeholderTextColor="white"
               value={email}
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setData({ ...formData, email: value }),
                   delete errors.email,
                   delete errors.invalidEmail;
@@ -393,7 +388,7 @@ function LoginScreen(props) {
                 fontSize: 18,
                 fontWeight: '700',
               }}
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setData({ ...formData, submited: false, password: value }),
                   delete errors.password;
               }}
@@ -469,19 +464,18 @@ function LoginScreen(props) {
 }
 
 function mapStateToProps(state) {
-  console.log({ state });
   return {
     authStatus: state.auth.USER_AUTH,
     backgroundImage: state.mainScreenInit.backgroundImage,
   };
 }
 
-const mapDispatchToProps = (dispatch) =>
+const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       doLogin,
     },
-    dispatch
+    dispatch,
   );
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

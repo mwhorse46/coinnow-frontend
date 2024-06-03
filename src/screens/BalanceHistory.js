@@ -37,26 +37,22 @@ function BalanceHistory(props) {
     loader: false,
   });
   const { historyList, totalPages, currentPage, loading, loader } = state;
-
-  const fetchData = (page) => {
-    getApi
-      .getData('seller/balanceHistory?page=' + page, [])
-      .then((response) => {
-        if (response.status == 1) {
-          setState((prevstate) => ({
-            ...prevstate,
-            historyList:
-              page == 1
-                ? response.data.data
-                : [...prevstate.historyList, ...response.data.data],
-            totalPages: response.data.last_page,
-            loading: false,
-            loader: false,
-          }));
-        }
-      });
+  const fetchData = page => {
+    getApi.getData('seller/balanceHistory?page=' + page, []).then(response => {
+      if (response.status == 1) {
+        setState(prevstate => ({
+          ...prevstate,
+          historyList:
+            page == 1
+              ? response.data.data
+              : [...prevstate.historyList, ...response.data.data],
+          totalPages: response.data.last_page,
+          loading: false,
+          loader: false,
+        }));
+      }
+    });
   };
-
   useEffect(() => {
     const unsubscribe = props.navigation.addListener('focus', () => {
       fetchData(1);
@@ -91,49 +87,38 @@ function BalanceHistory(props) {
     <BalanceHistoryItem navigation={props.navigation} history={item} />
   );
 
-  const currentBalance = (data) => {
+  const currentBalance = data => {
     const { type, price, balance, quantity, amount } = data;
     let balanceNew = 0;
-    let diff;
     switch (type) {
       case 'everyday_cut':
-        diff = -price;
         balanceNew = balance - price;
         break;
       case 'item_buy':
-        diff = -price * quantity;
         balanceNew = balance - price * quantity;
         break;
       case 'item_sell':
-        diff = price * quantity;
         balanceNew = balance + price * quantity;
         break;
       case 'item_sell_auto':
-        diff = price * quantity;
         balanceNew = balance + price * quantity;
         break;
       case 'special_item_buy':
-        diff = -price * quantity;
         balanceNew = balance - price * quantity;
         break;
       case 'special_item_sell':
-        diff = price * quantity;
         balanceNew = balance + price * quantity;
         break;
       case 'special_item_sell_auto':
-        diff = price * quantity;
         balanceNew = balance + price * quantity;
         break;
       case 'send_coin':
-        diff = -amount;
         balanceNew = balance - amount;
         break;
       case 'receive_coin':
-        diff = amount;
         balanceNew = balance + amount;
         break;
       case 'buy_coin':
-        diff = amount;
         balanceNew = balance + amount;
         break;
       case 'deducted coins to account':
@@ -143,32 +128,28 @@ function BalanceHistory(props) {
         balanceNew = balance;
         break;
       case 'trade':
-        diff = amount;
         balanceNew = balance;
         break;
       case 'clan_buy':
-        diff = -price;
         balanceNew = balance - price;
         break;
       case 'clan_join':
-        diff = -price;
         balanceNew = balance - price;
         break;
       case 'clan_joining':
-        diff = price;
         balanceNew = balance + price;
         break;
       case 'invest':
-        diff = -price;
         balanceNew = balance - price;
         break;
       case 'investor_win':
-        diff = price;
         balanceNew = balance + price;
         break;
       case 'star_win':
-        diff = price;
         balanceNew = balance + price;
+        break;
+      case 'tax_hourly':
+        balanceNew = balance - price;
         break;
       default:
         balanceNew = balance;

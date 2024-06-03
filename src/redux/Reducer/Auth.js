@@ -15,7 +15,6 @@ export default (state = initialState, action) => {
 
   switch (action.type) {
     case types.AUTH_STATUS:
-      console.log({ werewrwer: payload.status });
       return {
         ...state,
         USER_AUTH: payload.status,

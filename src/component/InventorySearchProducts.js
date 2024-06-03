@@ -19,47 +19,43 @@ import moment from 'moment';
 import getApi from '@apis/getApi';
 import { Button } from 'native-base';
 
-const ProductItem = (props) => {
+const ProductItem = props => {
   const item = props.item || {};
   const [loading, setLoading] = useState(false);
-
-  const onPressSale = (id) => {
+  const [trackedTime, setTrackedTime] = useState('');
+  const onPressSale = id => {
     setLoading(true);
     let sendData = new FormData();
     sendData.append('sale', 1);
     sendData.append('quantity', props.item.quantity);
     sendData.append('product_id', props.item.product_description.product_id);
     sendData.append('price', props.item.price);
-    getApi
-      .postData(`seller/listProductSale/${id}`, sendData)
-      .then((response) => {
-        console.log({ response });
-        logfunction('response ', response);
-        // alert(JSON.stringify(response))
-        props.getData('').then(() => {
-          setLoading(false);
-        });
+    getApi.postData(`seller/listProductSale/${id}`, sendData).then(response => {
+      logfunction('response ', response);
+      // alert(JSON.stringify(response))
+      props.getData('').then(() => {
+        setLoading(false);
       });
+    });
   };
-  const calculateTimeSoFar = (date) => {
-    let startDate = moment(date);
-    let endDate = moment(new Date());
-    let seconds = endDate.diff(startDate, 'seconds');
-    let minutes = endDate.diff(startDate, 'minutes');
-    let hours = endDate.diff(startDate, 'hours');
-    let days = endDate.diff(startDate, 'days');
-    if (days > 0) {
-      return days + ' days ago';
-    } else if (hours > 0) {
-      return hours + ' hours ago';
-    } else if (minutes > 0) {
-      return minutes + ' minutes ago';
-    } else if (seconds > 0) {
-      return seconds + ' seconds ago';
-    } else {
-      return 'Just Now';
-    }
+  const calculateTimeSoFar = date => {
+    date = new Date(date);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    const hours = Math.floor(diffInSeconds / 3600);
+    const minutes = Math.floor((diffInSeconds % 3600) / 60);
+    const seconds = diffInSeconds % 60;
+    setTrackedTime(`${hours}h ${minutes}m ${seconds}s ago`);
   };
+  useEffect(() => {
+    calculateTimeSoFar(item.pivot.created_at);
+    const interval = setInterval(() => {
+      calculateTimeSoFar(item.pivot.created_at);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [item.pivot.created_at]);
+
   return (
     <View
       style={styles.cartContent}
@@ -105,11 +101,9 @@ const ProductItem = (props) => {
               </Text>
             </View>
           )}
-          {item?.pivot?.sale === 0 && (
-            <Text style={[styles.originalPrice, { color: 'red' }]}>
-              {calculateTimeSoFar(item.pivot.updated_at)}
-            </Text>
-          )}
+          <Text style={[styles.originalPrice, { color: 'red' }]}>
+            {trackedTime}
+          </Text>
           {item.off != null && <Text style={styles.offerTxt}>{item.off} </Text>}
         </View>
         <View style={{ paddingRight: 12 }}>
@@ -130,14 +124,14 @@ const ProductItem = (props) => {
       <View style={styles.taxContent}>
         <Text style={styles.price}>Buy Price: {item.pivot.origin_price}</Text>
         <Text style={styles.price}>Current Price: {item.price}</Text>
-        {item?.pivot?.sale === 0 &&
+        {!!item?.pivot?.hourly_tax_list &&
           item?.pivot?.hourly_tax_list?.split('_')?.map(
             (tax, idx) =>
               tax !== '' && (
                 <Text key={idx} style={styles.price}>
                   Hour {idx + 1} Tax: {tax}
                 </Text>
-              )
+              ),
           )}
       </View>
     </View>

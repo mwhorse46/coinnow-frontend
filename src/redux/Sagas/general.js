@@ -9,12 +9,13 @@ import {
   successWishlist,
   addRemoveWishlist,
 } from '@actions';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logfunction, _getLocalCart } from '@helpers/FunctionHelper';
 import * as RootNavigation from '../../AppNavigator';
+import { requestInit } from '../Action/general';
 
 export function* watchGeneralRequest() {
-  yield takeEvery(types.REQUEST_INIT, requestInit);
+  // yield takeEvery(types.REQUEST_INIT, requestInit);
   yield takeEvery(types.ADD_TO_CART, addToCart);
   yield takeEvery(types.ADD_TO_WISHLIST, addToWishlist);
   yield takeEvery(types.REMOVE_CART, removeFromCart);
@@ -25,57 +26,57 @@ export function* watchGeneralRequest() {
   yield takeEvery(types.DO_LOGOUT, doLogout);
 }
 
-function* requestInit(action) {
-  try {
-    // ************** If you want to login based home page then do stuff here ****************
+// function* requestInit(action) {
+//   try {
+//     // ************** If you want to login based home page then do stuff here ****************
 
-    // if (action.payload.userAuth) {
-    //     yield put(successInt('HomeScreen'));
-    // }
-    // else {
-    //     yield put(successInt('LoginScreen'));
-    // }
+//     // if (action.payload.userAuth) {
+//     //     yield put(successInt('HomeScreen'));
+//     // }
+//     // else {
+//     //     yield put(successInt('LoginScreen'));
+//     // }
 
-    // ************** Else here ****************
+//     // ************** Else here ****************
 
-    //AsyncStorage.removeItem('IS_AUTH');
+//     //AsyncStorage.removeItem('IS_AUTH');
 
-    //get local login data
-    let getAuth = yield call(AsyncStorage.getItem, 'IS_AUTH');
-    logfunction('IS LOGGED ', getAuth);
+//     //get local login data
+//     let getAuth = yield call(AsyncStorage.getItem, 'IS_AUTH');
+//     logfunction('IS LOGGED ', getAuth);
 
-    if (getAuth == 1) {
-      yield put(authStatus(true));
-      let getData = yield call(AsyncStorage.getItem, 'CUSTOMER_DATA');
-      yield put(authData(JSON.parse(getData)));
+//     if (getAuth == 1) {
+//       yield put(authStatus(true));
+//       let getData = yield call(AsyncStorage.getItem, 'CUSTOMER_DATA');
+//       yield put(authData(JSON.parse(getData)));
 
-      //cart count set
-      let getLocalCart = yield call(AsyncStorage.getItem, 'CART_DATA');
-      logfunction('LOCAL CART  ', JSON.parse(getLocalCart));
-      getLocalCart = JSON.parse(getLocalCart);
-      if (getLocalCart) {
-        yield put(successCart(getLocalCart));
-      }
+//       //cart count set
+//       let getLocalCart = yield call(AsyncStorage.getItem, 'CART_DATA');
+//       logfunction('LOCAL CART  ', JSON.parse(getLocalCart));
+//       getLocalCart = JSON.parse(getLocalCart);
+//       if (getLocalCart) {
+//         yield put(successCart(getLocalCart));
+//       }
 
-      //Wishlist count set
-      let getLocalWishlist = yield call(
-        AsyncStorage.getItem,
-        'GET_LOCAL_WISHLIST',
-      );
-      logfunction('LOCAL Wishlist  ', JSON.parse(getLocalWishlist));
-      getLocalWishlist = JSON.parse(getLocalWishlist);
-      if (getLocalWishlist) {
-        yield put(successWishlist(getLocalWishlist));
-      }
-    } else {
-      yield put(authStatus(false));
-    }
+//       //Wishlist count set
+//       let getLocalWishlist = yield call(
+//         AsyncStorage.getItem,
+//         'GET_LOCAL_WISHLIST',
+//       );
+//       logfunction('LOCAL Wishlist  ', JSON.parse(getLocalWishlist));
+//       getLocalWishlist = JSON.parse(getLocalWishlist);
+//       if (getLocalWishlist) {
+//         yield put(successWishlist(getLocalWishlist));
+//       }
+//     } else {
+//       yield put(authStatus(false));
+//     }
 
-    yield put(successInt('MainScreen'));
-  } catch (e) {
-    logfunction(e);
-  }
-}
+//     yield put(successInt('MainScreen'));
+//   } catch (e) {
+//     logfunction(e);
+//   }
+// }
 
 function* addToCart(action) {
   try {
@@ -150,6 +151,7 @@ function* addToWishlist(action) {
 function* doLogin(action) {
   try {
     yield put(authStatus(true));
+    console.log({ action });
     const {
       data: { status, cartCount, wishlistData, data = {} },
       navigateTo,
@@ -161,15 +163,27 @@ function* doLogin(action) {
     };
     if (status) {
       yield put(authData(userData));
-      AsyncStorage.setItem('IS_AUTH', '1');
-      AsyncStorage.setItem('CUSTOMER_DATA', JSON.stringify(userData));
+      yield call([AsyncStorage, 'setItem'], 'IS_AUTH', '1');
+      yield call(
+        [AsyncStorage, 'setItem'],
+        'CUSTOMER_DATA',
+        JSON.stringify(userData),
+      );
       let storeArr = { totalCount: cartCount };
       logfunction('ARR TO data ', userData);
-      AsyncStorage.setItem('CART_DATA', JSON.stringify(storeArr));
+      yield call(
+        [AsyncStorage, 'setItem'],
+        'CART_DATA',
+        JSON.stringify(storeArr),
+      );
       yield put(successCart(storeArr));
       if (wishlistData.length > 0) {
         let wishData = wishlistData;
-        AsyncStorage.setItem('GET_LOCAL_WISHLIST', JSON.stringify(wishData));
+        yield call(
+          [AsyncStorage, 'setItem'],
+          'GET_LOCAL_WISHLIST',
+          JSON.stringify(wishData),
+        );
         yield put(successWishlist(wishData));
       }
       yield put(authStatus(true));
@@ -177,6 +191,7 @@ function* doLogin(action) {
     } else {
       yield put(authStatus(false));
     }
+    yield put(requestInit(false));
   } catch (e) {
     logfunction('ERROR =', e);
   }
@@ -187,15 +202,14 @@ function* doLogout(action) {
     let wishData = { totalCount: 0, wishlistData: [] };
     let storeArr = { totalCount: 0 };
     yield put(authStatus(false));
-    console.log('DuSan!!!!');
     yield put(successWishlist(wishData));
     yield put(successCart(storeArr));
     yield put(authData({}));
     RootNavigation.navigate('MainScreen');
-    AsyncStorage.removeItem('CUSTOMER_DATA');
-    AsyncStorage.removeItem('IS_AUTH');
-    AsyncStorage.removeItem('GET_LOCAL_WISHLIST');
-    AsyncStorage.removeItem('CART_DATA');
+    yield call([AsyncStorage, 'removeItem'], 'CUSTOMER_DATA');
+    yield call([AsyncStorage, 'removeItem'], 'IS_AUTH');
+    yield call([AsyncStorage, 'removeItem'], 'GET_LOCAL_WISHLIST');
+    yield call([AsyncStorage, 'removeItem'], 'CART_DATA');
   } catch (e) {
     logfunction('ERROR =', e);
   }

@@ -46,7 +46,6 @@ function Product(props) {
       </View>
     );
   };
-
   return (
     <>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>

@@ -18,25 +18,7 @@ import { imageNotFound } from '../../common';
 
 function ProductView(props) {
   const data = props.data || {};
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const prices = data.product_price || [];
-  const productChange = React.useMemo(() => {
-    const prevPrice = prices.length > 1 ? prices[1].price : 0;
-    return data.price - prevPrice;
-  }, [prices, data.price]);
-  let off = null;
   let special = 0;
-  if (data.special != null) {
-    let startDate = moment(data.special.start_date, 'DD/MM/YYYY');
-    let endDate = moment(data.special.end_date, 'DD/MM/YYYY');
-    if (
-      startDate <= moment(new Date(), 'DD/MM/YYYY') &&
-      endDate >= moment(new Date(), 'DD/MM/YYYY')
-    ) {
-      special = data.special.price;
-      off = calculateOffPercentage(data.price, data.special.price) + '% off';
-    }
-  }
 
   return (
     <TouchableOpacity
@@ -81,27 +63,7 @@ function ProductView(props) {
         </View>
       </View>
       <View>
-        {special > 0 ? (
-          data.quantity > 0 || data.sellers_count > 0 ? (
-            <View style={styles.SpcialView}>
-              <View style={GlobalStyles.coinWrapper}>
-                <Image source={coinImage} style={GlobalStyles.coinImage} />
-                <Text style={styles.price}>{numberWithComma(special)} </Text>
-              </View>
-
-              <Text style={styles.price}>
-                <Image source={coinImage} style={GlobalStyles.coinImage} />
-                {numberWithComma(data.price)}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.SpcialView}>
-              <View style={GlobalStyles.coinWrapper}>
-                <Text style={styles.notAvailable}>Not Available</Text>
-              </View>
-            </View>
-          )
-        ) : data.quantity > 0 || data.sellers_count > 0 ? (
+        {data.quantity > 0 || data.sellers_count > 0 ? (
           <View style={GlobalStyles.coinWrapper}>
             <Image source={coinImage} style={GlobalStyles.coinImage} />
             <Text style={[styles.price]}>{numberWithComma(data.price)}</Text>

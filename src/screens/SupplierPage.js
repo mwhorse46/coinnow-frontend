@@ -17,71 +17,29 @@ import { SliderBox } from 'react-native-image-slider-box';
 import { useFocusEffect } from '@react-navigation/native';
 import { LiveUpdate, OtrixLoader } from '../component';
 import { setNewProducts } from '../redux/Action/general';
+const homeCategories = require('../../categoryStore');
 function SupplierPage(props) {
-  const [state, setState] = React.useState({
-    homePageData: [],
-    loading: true,
-    profileImageURL: null,
-  });
   const { newProducts } = props;
-  const [loading1, setLoading] = React.useState(false);
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [totalPage, setTotalPage] = React.useState(1);
   const [images, setImages] = React.useState([]);
 
   const addToWish = async id => {
     let wishlistData = await _addToWishlist(id);
     props.addToWishList(wishlistData, id);
   };
-  const fetchData = page => {
-    console.log('fetchData', page);
-    return getApi
-      .getData(`getNewProductsV1?page=${page}`)
-      .then(response => {
-        console.log({ response });
-        setLoading(false);
-        if (response.status == 1) {
-          setCurrentPage(response.productsList.current_page);
-          setTotalPage(response.productsList.last_page);
-          if (page == 1) {
-            props.setNewProducts(response.productsList.data);
-            return;
-          } else {
-            props.setNewProducts([
-              ...newProducts,
-              ...response.productsList.data,
-            ]);
-          }
+  const fetchData = () => {
+    getApi
+      .getData('getNewProductsV1')
+      .then(async response => {
+        if (response.status === 1) {
+          props.setNewProducts(response.productsList);
         }
       })
-      .catch(err => {
-        console.log({ err });
-        setLoading(false);
-      });
+      .catch(() => {});
   };
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     if (props.product) {
-  //       if (props.product.id == 'all') {
-  //         fetchData(1).then(() => {
-  //           props.setNewProduct(null);
-  //         });
-  //         return;
-  //       }
-  //       for (let i = 0; i < newProducts?.length; i++) {
-  //         if (newProducts[i].id == props.product.id) {
-  //           newProducts[i].price = props.product.price;
-  //           newProducts[i].product_price = props.product.productPrice;
-  //           setNewProducts([...newProducts]);
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   }, [props.product]),
-  // );
-
   useEffect(() => {
-    fetchData(1);
+    fetchData();
+  }, []);
+  useEffect(() => {
     getApi.getData('getBannerImages').then(response => {
       const imgs = response.images.map(image => {
         return 'https://my.inventory.marketmajesty.net/uploads/banner/' + image;
@@ -89,85 +47,44 @@ function SupplierPage(props) {
       setImages(imgs);
     });
   }, []);
-  useFocusEffect(
-    React.useCallback(() => {
-      getApi
-        .getData('getHomePage', [])
-        .then(response => {
-          if (response.status == 1) {
-            logfunction('RESPONSEEE ', response);
-            setState({
-              ...state,
-              homePageData: response.data,
-              loading: false,
-            });
-          }
-        })
-        .catch(err => {
-          setState({
-            ...state,
-            loading: false,
-          });
-        });
-    }, []),
-  );
 
-  const paginate = () => {
-    if (loading1) return;
-    if (currentPage < totalPage && totalPage > 1) {
-      setLoading(true);
-      fetchData(currentPage + 1);
-    }
-    return;
-  };
-
-  const { homePageData, loading } = state;
-  const { wishlistData, customerData } = props;
-  logfunction('profile Image ', customerData);
-  logfunction('wishlistData wishlistData ', wishlistData);
+  const { wishlistData } = props;
   return (
     <OtrixContainer customStyles={{ backgroundColor: '#0A0A0A' }}>
-      {loading ? (
-        <HomeSkeleton />
-      ) : (
-        <OtrixContent action={paginate}>
-          <SliderBox
-            images={images}
-            ImageComponentStyle={{
-              borderRadius: 10,
-              width: '90%',
-              marginTop: 15,
-              marginRight: 30,
-            }}
-            sliderBoxHeight={150}
-            resizeMethod={'resize'}
-            resizeMode={'cover'}
-            autoplay
-            circleLoop
-            dotStyle={{
-              width: 0,
-            }}
-          />
+      <OtrixContent>
+        <SliderBox
+          images={images}
+          ImageComponentStyle={{
+            borderRadius: 10,
+            width: '90%',
+            marginTop: 15,
+            marginRight: 30,
+          }}
+          sliderBoxHeight={150}
+          resizeMethod={'resize'}
+          resizeMode={'cover'}
+          autoplay
+          circleLoop
+          dotStyle={{
+            width: 0,
+          }}
+        />
 
-          <HomeCategoryView
-            navigation={props.navigation}
-            data={homePageData.categories}
-          />
-          <LiveUpdate />
+        <HomeCategoryView navigation={props.navigation} data={homeCategories} />
+        <LiveUpdate />
 
-          <NewProduct
-            navigation={props.navigation}
-            wishlistArr={wishlistData}
-            data={newProducts?.length > 0 ? newProducts : []}
-            arr={newProducts}
-            addToWishlist={addToWish}
-            userAuth={props.USER_AUTH}
-            customerData={props.customerData}
-          />
+        <NewProduct
+          navigation={props.navigation}
+          wishlistArr={wishlistData}
+          data={newProducts?.length > 0 ? newProducts : []}
+          arr={newProducts}
+          addToWishlist={addToWish}
+          userAuth={props.USER_AUTH}
+          customerData={props.customerData}
+        />
 
-          {loading1 && <OtrixLoader />}
-        </OtrixContent>
-      )}
+        {/* {loading1 && <OtrixLoader />} */}
+      </OtrixContent>
     </OtrixContainer>
   );
 }
